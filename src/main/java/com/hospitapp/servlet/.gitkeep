@@ -1,0 +1,2 @@
+# Ce dossier contiendra les Servlets (contrôleurs HTTP).
+# PatientServlet, PersonnelServlet, SoinServlet… seront ajoutés au Commit 9.

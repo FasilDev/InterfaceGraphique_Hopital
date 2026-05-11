@@ -1,0 +1,4 @@
+# Ce dossier contiendra les fichiers JSP (vues MVC).
+# listPatients.jsp, detailPatient.jsp… seront ajoutés aux Commits 10 et 11.
+# Les JSP sont dans WEB-INF/views/ pour qu'elles ne soient PAS accessibles directement
+# par URL — elles ne peuvent être appelées que via un Servlet (sécurité MVC).

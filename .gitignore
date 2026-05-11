@@ -2,6 +2,10 @@
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+.idea/
+*.iml
+*.iws
+*.ipr
 
 ### Eclipse ###
 .apt_generated
@@ -27,3 +31,17 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+### Maven ###
+# Dossier de build Maven — généré automatiquement, ne pas versionner
+target/
+# Fichiers Maven locaux (cache de dépendances)
+*.class
+
+### Tomcat ###
+# Logs d'erreur JVM
+hs_err_pid*.log
+
+### Données sensibles ###
+# Ne jamais versionner des fichiers contenant des mots de passe ou données réelles
+# resources/patients_reel.csv
