@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    📄 Fichier : web.xml
+    📌 Ce fichier fait partie du projet HospitApp, une application web Java de gestion hospitalière.
+    🧩 Rôle de ce fichier : Descripteur de déploiement de l'application web.
+                            C'est le "passeport" que Tomcat lit au démarrage pour configurer l'appli.
+                            Il définit les pages d'accueil, les paramètres globaux, etc.
+    🔄 Il interagit avec : Tomcat (le serveur), tous les Servlets de l'application.
+    👶 Niveau débutant : Tomcat lit ce fichier en premier quand il démarre l'application.
+                         C'est ici qu'on lui dit quoi faire et comment l'application s'appelle.
+-->
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+         https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+    <!--
+        version="6.0" = Jakarta EE 10 / Servlet 6.0
+        Compatible avec Tomcat 10.1+
+        NE PAS utiliser version="5.0" (c'est pour Tomcat 10.0) ou "4.0" (Tomcat 9 / javax.*)
+    -->
+
+    <!-- Nom affiché dans la console d'administration de Tomcat -->
+    <display-name>HospitApp - Gestion Hospitalière</display-name>
+
+    <!-- Description courte de l'application -->
+    <description>Application web Java de gestion hospitalière - Projet B3 POO Avancée</description>
+
+    <!--
+        Pages d'accueil par défaut.
+        Quand l'utilisateur visite http://localhost:8080/HospitApp/
+        sans préciser de fichier, Tomcat cherche ces fichiers dans l'ordre.
+        Il s'arrête au premier fichier trouvé.
+    -->
+    <welcome-file-list>
+        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+
+    <!--
+        ===== À COMPLÉTER AUX COMMITS SUIVANTS =====
+        Les déclarations de Servlets seront ajoutées ici :
+
+        <servlet>
+            <servlet-name>PatientServlet</servlet-name>
+            <servlet-class>com.hospitapp.servlet.PatientServlet</servlet-class>
+        </servlet>
+        <servlet-mapping>
+            <servlet-name>PatientServlet</servlet-name>
+            <url-pattern>/patients</url-pattern>
+        </servlet-mapping>
+
+        Ou via l'annotation @WebServlet directement dans la classe Java (méthode moderne).
+    -->
+
+</web-app>

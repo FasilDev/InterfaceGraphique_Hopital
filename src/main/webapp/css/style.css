@@ -1,0 +1,173 @@
+/*
+ * 📄 Fichier : style.css
+ * 📌 Ce fichier fait partie du projet HospitApp, une application web Java de gestion hospitalière.
+ * 🧩 Rôle de ce fichier : Feuille de style personnalisée qui complète Bootstrap.
+ *                         Bootstrap gère la structure générale (grille, boutons, tableaux).
+ *                         Ce fichier gère les détails visuels propres à HospitApp.
+ * 🔄 Il interagit avec : tous les fichiers JSP via la balise <link rel="stylesheet">.
+ * 👶 Niveau débutant : CSS = Cascading Style Sheets = les règles d'apparence des pages web.
+ *                      Les styles définis ici s'appliquent PAR-DESSUS Bootstrap (cascade).
+ */
+
+/* ===== STYLES GLOBAUX ===== */
+
+/*
+ * body : l'élément racine de la page HTML.
+ * min-height: 100vh = au moins 100% de la hauteur de l'écran visible.
+ * display: flex + flex-direction: column = technique pour coller le footer en bas de page
+ * même quand le contenu est court (pas de scroll inutile).
+ */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa; /* Gris très clair Bootstrap — fond neutre et reposant */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Police lisible */
+}
+
+/*
+ * main : contenu principal entre la navbar et le footer.
+ * flex: 1 = prend tout l'espace vertical disponible → pousse le footer vers le bas.
+ */
+main {
+    flex: 1;
+}
+
+/* ===== BARRE DE NAVIGATION ===== */
+
+/* Petite ombre sous la navbar pour la démarquer du contenu */
+.navbar {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ===== CARTES DE NAVIGATION ===== */
+
+/*
+ * Animation au survol de la souris sur une carte :
+ * transition = durée et type de l'animation (0.2s = 200ms, ease-in-out = accélération douce).
+ */
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+/*
+ * :hover = styles appliqués quand la souris est au-dessus de l'élément.
+ * translateY(-5px) = déplace la carte 5 pixels vers le haut → effet "flottant".
+ * !important = force ce style à prendre le dessus sur Bootstrap.
+ */
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ===== TABLEAUX ===== */
+
+/*
+ * tbody tr:hover = ligne du tableau quand on passe la souris dessus.
+ * cursor: pointer = le curseur devient une main → indique que la ligne est cliquable.
+ */
+.table-hover tbody tr:hover {
+    cursor: pointer;
+}
+
+/* ===== FORMULAIRES ===== */
+
+/*
+ * :focus = styles appliqués quand un champ est sélectionné (on clique dedans).
+ * Renforce la bordure bleue pour mieux voir quel champ est actif.
+ */
+.form-control:focus,
+.form-select:focus {
+    border-color: #0d6efd;                           /* Bleu Bootstrap primaire */
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* Halo bleu semi-transparent */
+}
+
+/* ===== MESSAGES D'ALERTE FLASH ===== */
+
+/*
+ * Animation fadeIn : les messages de succès/erreur apparaissent en douceur.
+ * "animation: fadeIn 0.3s ease-in" = exécute l'animation fadeIn en 0.3 secondes.
+ */
+.alert {
+    animation: fadeIn 0.3s ease-in;
+}
+
+/*
+ * @keyframes = définition de l'animation étape par étape.
+ * from (0%) → to (100%) = de l'état de départ à l'état final.
+ */
+@keyframes fadeIn {
+    from {
+        opacity: 0;                    /* Complètement transparent au départ */
+        transform: translateY(-10px);  /* Légèrement au-dessus de sa position finale */
+    }
+    to {
+        opacity: 1;                    /* Complètement visible à la fin */
+        transform: translateY(0);      /* À sa position normale */
+    }
+}
+
+/* ===== BADGES DE PRIORITÉ MÉDICALE ===== */
+/*
+ * Utilisés dans la file d'attente des urgences (commit 4+).
+ * 4 niveaux de priorité avec des couleurs distinctes et intuitives.
+ */
+
+/* Urgence critique — rouge vif — priorité maximale (ex: arrêt cardiaque) */
+.badge-critique {
+    background-color: #dc3545;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+/* Urgence élevée — orange — priorité haute (ex: fracture ouverte) */
+.badge-eleve {
+    background-color: #fd7e14;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+/* Urgence modérée — jaune — priorité moyenne (ex: forte douleur) */
+.badge-modere {
+    background-color: #ffc107;
+    color: #212529; /* Texte sombre sur fond clair pour lisibilité */
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+/* Urgence faible — vert — priorité basse (ex: petite blessure) */
+.badge-faible {
+    background-color: #198754;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+/* ===== STATUTS DE LIT ===== */
+/* Utilisés dans la gestion des salles (commit 8+) */
+
+.statut-occupe {
+    color: #dc3545; /* Rouge = occupé */
+    font-weight: bold;
+}
+
+.statut-libre {
+    color: #198754; /* Vert = libre */
+    font-weight: bold;
+}
+
+/* ===== PIED DE PAGE ===== */
+
+/*
+ * margin-top: auto = pousse le footer tout en bas grâce au flexbox sur body.
+ * Sans cette règle, le footer se collerait au contenu quand il est court.
+ */
+footer {
+    margin-top: auto;
+}

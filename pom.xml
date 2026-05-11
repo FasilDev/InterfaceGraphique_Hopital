@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        Identifiants Maven du projet :
+        - groupId  : comme le nom de domaine inversé de l'organisation
+        - artifactId : nom du projet
+        - version  : version courante (SNAPSHOT = en développement)
+        - packaging : "war" = Web Application Archive, déployable sur Tomcat
+    -->
+    <groupId>com.hospitapp</groupId>
+    <artifactId>HospitApp</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>war</packaging>
+
+    <name>HospitApp - Gestion Hospitalière</name>
+    <description>Application web Java de gestion hospitalière - Projet POO Avancée B3</description>
+
+    <properties>
+        <!--
+            Java 17 : version LTS (Long Term Support) recommandée.
+            Compatible Tomcat 10.1+ et Jakarta EE 10.
+        -->
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <!-- Encodage UTF-8 pour éviter les problèmes d'accents -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+
+        <!--
+            ╔══════════════════════════════════════════════════════╗
+            ║  ATTENTION : Tomcat 10+ utilise "jakarta.*"          ║
+            ║  et NON "javax.*" (c'était Tomcat 9 et avant).       ║
+            ║  C'est la différence entre Jakarta EE et Java EE.    ║
+            ╚══════════════════════════════════════════════════════╝
+
+            Jakarta Servlet API 6.0 — compatible Tomcat 10.1+
+            scope "provided" = fournie par Tomcat au démarrage,
+            ne pas l'inclure dans le WAR pour éviter les conflits.
+        -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!--
+            JSTL (Jakarta Standard Tag Library) pour les JSP.
+            Permet d'utiliser des balises comme <c:forEach>, <c:if>, <c:out>
+            dans les JSP au lieu d'écrire du Java scriptlet (<% ... %>).
+            Meilleure pratique : moins de Java dans le HTML = vues plus propres.
+        -->
+        <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+        <dependency>
+            <!-- Implémentation concrète de JSTL (GlassFish) -->
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+            <version>3.0.1</version>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <!-- Nom du fichier WAR généré : HospitApp.war dans target/ -->
+        <finalName>HospitApp</finalName>
+
+        <plugins>
+            <!--
+                Plugin Maven WAR : construit le fichier .war à partir des sources.
+                La commande "mvn clean package" déclenche ce plugin.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>3.4.0</version>
+                <configuration>
+                    <!-- Chemin vers le dossier des ressources web (JSP, CSS, images…) -->
+                    <warSourceDirectory>src/main/webapp</warSourceDirectory>
+                    <!--
+                        failOnMissingWebXml = false : ne pas échouer si web.xml est absent.
+                        (On l'a quand même, mais bonne pratique de mettre false en Jakarta EE)
+                    -->
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
