@@ -89,6 +89,24 @@ public class PersonnelService {
         return registreMedecins.getTous();
     }
 
+    /**
+     * Recherche des médecins par nom/prénom et spécialité, triés par nom.
+     * Chaque critère est optionnel (null ou vide = ignoré).
+     * Utilisé par PersonnelServlet pour filtrer la liste affichée.
+     */
+    public List<Medecin> rechercherMedecins(String nom, String specialite, boolean croissant) {
+        List<Medecin> resultats = registreMedecins.getTous().stream()
+                .filter(m -> nom == null || nom.isBlank()
+                        || m.getNom().toLowerCase().contains(nom.toLowerCase())
+                        || m.getPrenom().toLowerCase().contains(nom.toLowerCase()))
+                .filter(m -> specialite == null || specialite.isBlank()
+                        || m.getSpecialite().toLowerCase().contains(specialite.toLowerCase()))
+                .collect(Collectors.toList());
+        Comparator<Medecin> comp = Comparator.comparing(Medecin::getNom, String.CASE_INSENSITIVE_ORDER);
+        resultats.sort(croissant ? comp : comp.reversed());
+        return resultats;
+    }
+
     // -----------------------------------------------------------------------
     // Infirmiers — CRUD
     // -----------------------------------------------------------------------
@@ -113,6 +131,23 @@ public class PersonnelService {
 
     public List<Infirmier> listerInfirmiers() {
         return registreInfirmiers.getTous();
+    }
+
+    /**
+     * Recherche des infirmiers par nom/prénom et service, triés par nom.
+     * Le paramètre "service" correspond au service hospitalier (ex : "Urgences").
+     */
+    public List<Infirmier> rechercherInfirmiers(String nom, String service, boolean croissant) {
+        List<Infirmier> resultats = registreInfirmiers.getTous().stream()
+                .filter(i -> nom == null || nom.isBlank()
+                        || i.getNom().toLowerCase().contains(nom.toLowerCase())
+                        || i.getPrenom().toLowerCase().contains(nom.toLowerCase()))
+                .filter(i -> service == null || service.isBlank()
+                        || i.getService().toLowerCase().contains(service.toLowerCase()))
+                .collect(Collectors.toList());
+        Comparator<Infirmier> comp = Comparator.comparing(Infirmier::getNom, String.CASE_INSENSITIVE_ORDER);
+        resultats.sort(croissant ? comp : comp.reversed());
+        return resultats;
     }
 
     // -----------------------------------------------------------------------

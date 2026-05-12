@@ -150,6 +150,35 @@ public class SoinService {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Recherche des consultations par numéro de patient et/ou matricule de médecin.
+     * Résultats triés du plus récent au plus ancien.
+     * Critères optionnels : null ou vide = ignoré.
+     */
+    public List<Consultation> rechercherConsultations(String numeroPatient, String matriculeMedecin) {
+        return registreConsultations.getTous().stream()
+                .filter(c -> numeroPatient == null || numeroPatient.isBlank()
+                        || c.getNumeroPatient().equals(numeroPatient))
+                .filter(c -> matriculeMedecin == null || matriculeMedecin.isBlank()
+                        || c.getMatriculeMedecin().equals(matriculeMedecin))
+                .sorted(Comparator.comparing(Soin::getDateSoin).reversed())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Recherche des actes chirurgicaux par numéro de patient et/ou matricule de médecin.
+     * Résultats triés du plus récent au plus ancien.
+     */
+    public List<ActeChirurgical> rechercherActes(String numeroPatient, String matriculeMedecin) {
+        return registreActes.getTous().stream()
+                .filter(a -> numeroPatient == null || numeroPatient.isBlank()
+                        || a.getNumeroPatient().equals(numeroPatient))
+                .filter(a -> matriculeMedecin == null || matriculeMedecin.isBlank()
+                        || a.getMatriculeMedecin().equals(matriculeMedecin))
+                .sorted(Comparator.comparing(Soin::getDateSoin).reversed())
+                .collect(Collectors.toList());
+    }
+
     // -----------------------------------------------------------------------
     // Urgences — gestion de la file
     // -----------------------------------------------------------------------

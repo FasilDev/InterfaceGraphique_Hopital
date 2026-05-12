@@ -17,6 +17,7 @@ package servlet;
 import controller.PatientService;
 import controller.PersonnelService;
 import controller.SoinService;
+import model.ActeChirurgical;
 import model.Consultation;
 import util.CsvService;
 
@@ -27,6 +28,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.List;
 
 @WebServlet("/soins")
 public class SoinServlet extends HttpServlet {
@@ -62,8 +64,24 @@ public class SoinServlet extends HttpServlet {
 
     private void listerSoins(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.setAttribute("consultations", soinService.listerConsultations());
-        req.setAttribute("actes",         soinService.listerActes());
+        String numeroPatient    = req.getParameter("numeroPatient");
+        String matriculeMedecin = req.getParameter("matriculeMedecin");
+        String type             = req.getParameter("type"); // "consultation", "acte", ou null = tous
+
+        // Si on filtre par type, on vide la liste de l'autre type pour éviter de l'afficher
+        List<Consultation>    consultations = "acte".equals(type)
+                ? java.util.Collections.emptyList()
+                : soinService.rechercherConsultations(numeroPatient, matriculeMedecin);
+
+        List<ActeChirurgical> actes = "consultation".equals(type)
+                ? java.util.Collections.emptyList()
+                : soinService.rechercherActes(numeroPatient, matriculeMedecin);
+
+        req.setAttribute("consultations",         consultations);
+        req.setAttribute("actes",                 actes);
+        req.setAttribute("criterePatient",        numeroPatient);
+        req.setAttribute("critereMedecin",        matriculeMedecin);
+        req.setAttribute("critereType",           type);
         forward(req, resp, "/WEB-INF/views/soins/liste.jsp");
     }
 

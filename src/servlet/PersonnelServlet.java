@@ -30,6 +30,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @WebServlet("/personnel")
 public class PersonnelServlet extends HttpServlet {
@@ -63,9 +65,28 @@ public class PersonnelServlet extends HttpServlet {
 
     private void listerPersonnel(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.setAttribute("medecins",   personnelService.listerMedecins());
-        req.setAttribute("infirmiers", personnelService.listerInfirmiers());
-        req.setAttribute("specialites", personnelService.getSpecialitesDisponibles());
+        String nom        = req.getParameter("nom");
+        String type       = req.getParameter("type");       // "medecin", "infirmier", ou null = tous
+        String specialite = req.getParameter("specialite"); // correspond à spécialité OU service
+        String triOrdre   = req.getParameter("ordre");
+        boolean croissant = !"desc".equals(triOrdre);
+
+        // Si type="infirmier", on ne remonte aucun médecin (et inversement)
+        List<Medecin> medecins = "infirmier".equals(type)
+                ? new ArrayList<>()
+                : personnelService.rechercherMedecins(nom, specialite, croissant);
+
+        List<Infirmier> infirmiers = "medecin".equals(type)
+                ? new ArrayList<>()
+                : personnelService.rechercherInfirmiers(nom, specialite, croissant);
+
+        req.setAttribute("medecins",          medecins);
+        req.setAttribute("infirmiers",        infirmiers);
+        req.setAttribute("specialites",       personnelService.getSpecialitesDisponibles());
+        req.setAttribute("critereNom",        nom);
+        req.setAttribute("critereType",       type);
+        req.setAttribute("critereSpecialite", specialite);
+        req.setAttribute("triOrdre",          triOrdre);
         forward(req, resp, "/WEB-INF/views/personnel/liste.jsp");
     }
 
