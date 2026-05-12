@@ -1,0 +1,4 @@
+id;nom;prenom;dateNaissance;telephone;email;matricule;service;qualification;gardeNuit;disponible;dateEmbauche
+00000000-0000-0000-0000-000000000021;Blanc;Amélie;1990-06-15;06 56 78 90 12;;INF-001;Cardiologie;IDE;false;true;2016-09-01
+00000000-0000-0000-0000-000000000022;Garnier;Nicolas;1987-09-03;;;INF-002;Urgences;IADE;true;true;2013-04-15
+00000000-0000-0000-0000-000000000023;Petit;Claire;1993-01-22;;;INF-003;Chirurgie;IBODE;false;true;2019-11-01

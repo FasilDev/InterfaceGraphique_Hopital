@@ -1,0 +1,4 @@
+id;motif;diagnostic;ordonnance;dateSoin;numeroPatient;matriculeMedecin;cout
+00000000-0000-0000-0000-000000000031;Douleurs thoraciques;Angine de poitrine stable;Trinitrine sublinguale 0.5mg au besoin + aspirine 75mg/j;2024-10-10;P-2024-001;MED-001;25.0
+00000000-0000-0000-0000-000000000032;Fatigue chronique et vertiges;Anémie ferriprive;Sulfate de fer 80mg/j pendant 3 mois;2024-10-14;P-2024-002;MED-003;25.0
+00000000-0000-0000-0000-000000000033;Céphalées récurrentes;Migraines sans aura - IRM recommandée;;2024-10-15;P-2024-004;MED-004;25.0

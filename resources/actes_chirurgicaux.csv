@@ -1,0 +1,3 @@
+id;typeActe;niveauPriorite;descriptionUrgence;salle;realise;dateSoin;numeroPatient;matriculeMedecin;cout
+00000000-0000-0000-0000-000000000041;Appendicectomie;2;Douleurs abdominales aiguës en fosse iliaque droite - appendicite probable;Bloc 2;false;2024-10-15;P-2024-003;MED-002;500.0
+00000000-0000-0000-0000-000000000042;Réduction fracture du poignet;3;Fracture du radius distal suite à une chute - déplacement modéré;Salle B;false;2024-10-15;P-2024-005;MED-002;500.0

@@ -1,0 +1,6 @@
+id;nom;prenom;dateNaissance;telephone;email;numeroPatient;groupeSanguin;antecedents;dateAdmission;dateSortie;admis;notes;chambre;numeroSecuriteSociale;prisEnCharge
+00000000-0000-0000-0000-000000000001;Dupont;Marie;1979-04-10;06 11 22 33 44;;P-2024-001;A+;Hypertension artérielle|Diabète type 2;2024-10-15;;true;;201;279047512345678;true
+00000000-0000-0000-0000-000000000002;Martin;Jean;1962-08-23;07 22 33 44 55;;P-2024-002;B-;Allergie pénicilline;;;;false;;;;162087534567890;false
+00000000-0000-0000-0000-000000000003;Bernard;Sophie;1996-12-05;06 33 44 55 66;;P-2024-003;O+;;2024-10-15;;true;;305;;false
+00000000-0000-0000-0000-000000000004;Lefèvre;Pierre;1951-03-17;;;P-2024-004;AB+;Insuffisance cardiaque congestive|Cholestérol élevé|Arthrose lombaire;;;;false;;;;false
+00000000-0000-0000-0000-000000000005;Rousseau;Camille;1990-09-08;06 55 66 77 88;;P-2024-005;A-;;2024-10-15;;true;;102;;false
