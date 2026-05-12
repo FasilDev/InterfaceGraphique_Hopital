@@ -4,9 +4,9 @@
 
 | Prénom Nom | Rôle principal |
 |---|---|
-| [Prénom 1] [Nom 1] | Modèle métier & Services |
-| [Prénom 2] [Nom 2] | Servlets & Architecture MVC |
-| [Prénom 3] [Nom 3] | Interface JSP & CSS |
+| John DINH | Modèle métier & Services |
+| Fasil MOUGAMADOU | Servlets & Architecture MVC |
+| Akash ROUBERT | Interface JSP & CSS |
 
 ---
 
@@ -179,7 +179,7 @@ Soin (abstract)
 
 | Membre | Commits | Responsabilités |
 |---|---|---|
-| [Prénom 1] | Commits 2, 3, 4, 5 | Modèle POO, interfaces, generics |
-| [Prénom 2] | Commits 6, 7, 8, 9 | Services, exceptions, Servlets |
-| [Prénom 3] | Commits 10, 11, 12, 13, 14 | JSP, CSS, Bootstrap, filtres |
+| John | Commits 2, 3, 4, 5 | Modèle POO, interfaces, generics |
+| Fasil | Commits 6, 7, 8, 9 | Services, exceptions, Servlets |
+| Akash | Commits 10, 11, 12, 13, 14 | JSP, CSS, Bootstrap, filtres |
 | Commun | Commits 1, 15 | Init projet, README, rapport |
