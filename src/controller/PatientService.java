@@ -180,6 +180,30 @@ public class PatientService {
     }
 
     /**
+     * Filtre les patients selon 3 critères, puis les trie selon la colonne et l'ordre choisis.
+     * Combine rechercherMulticriteres() et un tri dynamique en une seule passe.
+     * Si aucun critère n'est fourni et aucun tri demandé, retourne tous les patients.
+     *
+     * @param triColonne "nom" ou "date" (null = pas de tri)
+     * @param croissant  true = A→Z ou plus ancien en premier, false = inverse
+     */
+    public List<Patient> rechercherEtTrier(String nom, Boolean admis, String groupeSanguin,
+                                           String triColonne, boolean croissant) {
+        List<Patient> resultats = rechercherMulticriteres(nom, admis, groupeSanguin);
+        if ("date".equals(triColonne)) {
+            // nullsLast : patients sans date d'admission affichés en dernier dans les deux ordres
+            Comparator<Patient> comp = Comparator.comparing(
+                    Patient::getDateAdmission, Comparator.nullsLast(Comparator.naturalOrder()));
+            resultats.sort(croissant ? comp : comp.reversed());
+        } else if ("nom".equals(triColonne)) {
+            Comparator<Patient> comp = Comparator.comparing(
+                    Patient::getNom, String.CASE_INSENSITIVE_ORDER);
+            resultats.sort(croissant ? comp : comp.reversed());
+        }
+        return resultats;
+    }
+
+    /**
      * Retourne uniquement les patients actuellement hospitalisés.
      * Utilise la méthode filtrer() du registre avec une référence de méthode.
      * Patient::isAdmis est équivalent à p -> p.isAdmis().

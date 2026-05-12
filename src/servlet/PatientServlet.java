@@ -73,7 +73,25 @@ public class PatientServlet extends HttpServlet {
 
     private void listerPatients(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        req.setAttribute("patients", patientService.listerTous());
+        // Lecture des paramètres de filtre et de tri (tous optionnels)
+        String nom           = req.getParameter("nom");
+        String admisParam    = req.getParameter("admis");
+        String groupeSanguin = req.getParameter("groupeSanguin");
+        String triColonne    = req.getParameter("tri");
+        String triOrdre      = req.getParameter("ordre");
+
+        // "true"/"false" → Boolean, vide ou absent → null (= pas de filtre sur ce critère)
+        Boolean admis = (admisParam == null || admisParam.isBlank())
+                ? null : Boolean.parseBoolean(admisParam);
+        boolean croissant = !"desc".equals(triOrdre);
+
+        req.setAttribute("patients",              patientService.rechercherEtTrier(nom, admis, groupeSanguin, triColonne, croissant));
+        // On repasse les critères à la JSP pour pré-remplir les champs du formulaire de recherche
+        req.setAttribute("critereNom",            nom);
+        req.setAttribute("critereAdmis",          admisParam);
+        req.setAttribute("critereGroupeSanguin",  groupeSanguin);
+        req.setAttribute("triColonne",            triColonne);
+        req.setAttribute("triOrdre",              triOrdre);
         forward(req, resp, "/WEB-INF/views/patients/liste.jsp");
     }
 
@@ -112,12 +130,13 @@ public class PatientServlet extends HttpServlet {
         if (action == null) action = "";
 
         switch (action) {
-            case "ajouter"   -> ajouterPatient(req, resp);
-            case "modifier"  -> modifierPatient(req, resp);
-            case "supprimer" -> supprimerPatient(req, resp);
-            case "admettre"  -> admettrePatient(req, resp);
-            case "sortir"    -> sortirPatient(req, resp);
-            default          -> resp.sendRedirect(req.getContextPath() + "/patients");
+            case "ajouter"           -> ajouterPatient(req, resp);
+            case "modifier"          -> modifierPatient(req, resp);
+            case "supprimer"         -> supprimerPatient(req, resp);
+            case "admettre"          -> admettrePatient(req, resp);
+            case "sortir"            -> sortirPatient(req, resp);
+            case "ajouterAntecedent" -> ajouterAntecedent(req, resp);
+            default                  -> resp.sendRedirect(req.getContextPath() + "/patients");
         }
     }
 
@@ -191,6 +210,25 @@ public class PatientServlet extends HttpServlet {
             message(req, "Sortie enregistrée.", "success");
         } catch (Exception e) {
             message(req, "Sortie impossible : " + e.getMessage(), "danger");
+        }
+        resp.sendRedirect(req.getContextPath() + "/patients?action=detail&id=" + id);
+    }
+
+    private void ajouterAntecedent(HttpServletRequest req, HttpServletResponse resp)
+            throws IOException {
+        String id         = req.getParameter("id");
+        String antecedent = str(req.getParameter("antecedent"));
+        try {
+            Patient p = patientService.trouverParId(id);
+            if (p == null) throw new IllegalStateException("Patient introuvable.");
+            if (antecedent != null) {
+                p.ajouterAntecedent(antecedent);
+                patientService.modifier(p);
+                sauvegarder();
+                message(req, "Antécédent ajouté : " + antecedent, "success");
+            }
+        } catch (Exception e) {
+            message(req, "Erreur : " + e.getMessage(), "danger");
         }
         resp.sendRedirect(req.getContextPath() + "/patients?action=detail&id=" + id);
     }

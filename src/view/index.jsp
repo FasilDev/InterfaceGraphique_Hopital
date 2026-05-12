@@ -1,4 +1,4 @@
-<%--
+﻿<%--
     📄 Fichier : index.jsp
     📌 Ce fichier fait partie du projet HospitApp, une application web Java de gestion hospitalière.
     🧩 Rôle de ce fichier : Page d'accueil de l'application.
