@@ -33,7 +33,7 @@ public abstract class Personnel extends Personne {
     // Indique si ce membre du personnel est actuellement disponible
     // (pas en congé, pas déjà affecté à une tâche bloquante)
     private boolean disponible;
-    
+
     //Constructeur pour créer un nouveau membre du personnel.
 
     public Personnel(String nom, String prenom, LocalDate dateNaissance,

@@ -4,136 +4,158 @@
  *
  * Rôle : Représente un patient de l'hôpital.
  *        Gère son dossier médical : admission, antécédents, chambre et sortie.
- *        C'est l'entité centrale autour de laquelle tourne l'application.
+ *
+ * Interfaces implémentées :
+ *   - Soignable : le patient reçoit des soins, a des antécédents
+ *   - Facturable : le patient génère une facturation journalière
  *
  * Interactions : Personne (parent), PatientService, PatientServlet,
  *                JSP liste-patients.jsp, detail-patient.jsp, formulaire-patient.jsp
- *
- * TODO Commit 3 : ajouter "implements Soignable, Facturable" sur la déclaration de classe
  */
 
 package model;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Patient extends Personne {
+public class Patient extends Personne implements Soignable, Facturable {
 
-    // Numéro lisible unique dans l'hôpital (ex : "P-2024-001").
-    // Différent de l'UUID : c'est l'identifiant métier utilisé par le personnel.
+    // Numéro lisible unique dans l'hôpital (ex : "P-2024-001")
     private String numeroPatient;
 
-    // Groupe sanguin (ex : "A+", "O-", "AB+"). Stocké en String, peu de valeurs possibles.
     private String groupeSanguin;
 
-    // Liste des antécédents médicaux (ex : "Diabète type 2", "Allergie pénicilline").
-    // List<String> = liste ordonnée, on garde l'ordre de saisie.
-    // ArrayList est l'implémentation standard : efficace pour lire et ajouter en fin de liste.
-    // Pas de raw type "List" sans <String> — interdit dans ce projet.
+    // Antécédents médicaux : "Diabète type 2", "Allergie pénicilline", etc.
     private List<String> antecedents;
 
-    // Date d'hospitalisation. null si le patient n'a jamais été admis.
+    // Historique des soins reçus (descriptions textuelles pour l'instant)
+    // Sera lié aux objets Soin au Commit 4
+    private List<String> historiqueSoins;
+
     private LocalDate dateAdmission;
-
-    // Date de sortie. null si le patient est encore hospitalisé.
     private LocalDate dateSortie;
-
-    // true = actuellement hospitalisé, false = sorti ou jamais admis
     private boolean admis;
-
-    // Notes libres du dossier médical.
-    // Dans une vraie application, ce serait une entité séparée avec historique.
     private String notes;
-
-    // Chambre occupée (ex : "B203"). null si le patient n'est pas hospitalisé.
     private String chambre;
 
+    // Champs pour l'interface Facturable
+    private String numeroSecuriteSociale;
+    private boolean prisEnCharge;
+    // Tarif journalier simplifié (en euros)
+    private static final double TARIF_JOURNALIER = 350.0;
 
-    // Constructeur pour créer un nouveau patient.
+    // -----------------------------------------------------------------------
+    // Constructeurs
+    // -----------------------------------------------------------------------
 
     public Patient(String nom, String prenom, LocalDate dateNaissance, String numeroPatient) {
-        super(nom, prenom, dateNaissance); // appelle Personne → Entite (génère UUID)
+        super(nom, prenom, dateNaissance);
         this.numeroPatient = numeroPatient;
-        // On initialise toujours la liste pour éviter les NullPointerException
         this.antecedents = new ArrayList<>();
+        this.historiqueSoins = new ArrayList<>();
         this.admis = false;
         this.notes = "";
+        this.prisEnCharge = false;
     }
 
-    /**
-     * Constructeur avec id existant, utilisé lors du rechargement depuis le fichier CSV.
-     * On passe l'UUID déjà connu pour ne pas en recréer un nouveau.
-     */
     public Patient(String id, String nom, String prenom, LocalDate dateNaissance, String numeroPatient) {
         super(id, nom, prenom, dateNaissance);
         this.numeroPatient = numeroPatient;
         this.antecedents = new ArrayList<>();
+        this.historiqueSoins = new ArrayList<>();
         this.admis = false;
         this.notes = "";
+        this.prisEnCharge = false;
     }
 
     // -----------------------------------------------------------------------
     // Méthodes métier
     // -----------------------------------------------------------------------
 
-    /**
-     * Admet le patient dans l'hôpital et l'affecte à une chambre.
-     * Enregistre automatiquement la date du jour comme date d'admission.
-     *
-     * @param chambre Numéro de chambre (ex : "A101")
-     */
     public void admettre(String chambre) {
         this.admis = true;
         this.dateAdmission = LocalDate.now();
         this.chambre = chambre;
-        // On efface une éventuelle date de sortie précédente (réadmission possible)
         this.dateSortie = null;
     }
 
-    /**
-     * Fait sortir le patient de l'hôpital.
-     * Libère la chambre et enregistre la date de sortie.
-     */
     public void sortir() {
         this.admis = false;
         this.dateSortie = LocalDate.now();
-        // La chambre est libérée — null = disponible pour un autre patient
         this.chambre = null;
     }
 
-    /**
-     * Ajoute un antécédent médical au dossier du patient.
-     * Ignore les valeurs null ou vides pour ne pas polluer la liste.
-     *
-     * @param antecedent Description de l'antécédent (ex : "Hypertension")
-     */
     public void ajouterAntecedent(String antecedent) {
-        // isBlank() retourne true si la chaîne est vide ou ne contient que des espaces
         if (antecedent != null && !antecedent.isBlank()) {
             this.antecedents.add(antecedent);
         }
     }
 
-    /**
-     * Retourne les antécédents sous forme d'une chaîne lisible.
-     * Exemple : "Diabète type 2, Allergie pénicilline, Hypertension"
-     * Utilisé dans les JSP pour l'affichage en tableau.
-     */
     public String getAntecedentsFormates() {
-        if (antecedents == null || antecedents.isEmpty()) {
-            return "Aucun antécédent connu";
-        }
-        // String.join(séparateur, collection) construit "A, B, C" à partir d'une liste
+        if (antecedents == null || antecedents.isEmpty()) return "Aucun antécédent connu";
         return String.join(", ", antecedents);
     }
 
-    /**
-     * Retourne l'état d'admission sous forme de texte lisible pour l'affichage.
-     */
     public String getStatutAdmission() {
         return admis ? "Hospitalisé" : "Non hospitalisé";
     }
+
+    // -----------------------------------------------------------------------
+    // Implémentation de Soignable
+    // -----------------------------------------------------------------------
+
+    @Override
+    public List<String> getHistoriqueSoins() {
+        return historiqueSoins;
+    }
+
+    @Override
+    public void ajouterSoin(String descriptionSoin) {
+        if (descriptionSoin != null && !descriptionSoin.isBlank()) {
+            this.historiqueSoins.add(descriptionSoin);
+        }
+    }
+
+    // Un patient a des antécédents si sa liste n'est pas vide
+    @Override
+    public boolean aDesAntecedents() {
+        return antecedents != null && !antecedents.isEmpty();
+    }
+
+    // -----------------------------------------------------------------------
+    // Implémentation de Facturable
+    // -----------------------------------------------------------------------
+
+    /**
+     * Calcule le montant total basé sur le nombre de jours d'hospitalisation.
+     * Si le patient est encore hospitalisé, on compte jusqu'à aujourd'hui.
+     * Retourne 0 si le patient n'a jamais été admis.
+     */
+    @Override
+    public double calculerMontantTotal() {
+        if (dateAdmission == null) return 0.0;
+        LocalDate fin = (dateSortie != null) ? dateSortie : LocalDate.now();
+        long jours = ChronoUnit.DAYS.between(dateAdmission, fin);
+        // Minimum 1 jour facturé même pour une admission le jour même
+        jours = Math.max(jours, 1);
+        return jours * TARIF_JOURNALIER;
+    }
+
+    @Override
+    public String getNumeroSecuriteSociale() { return numeroSecuriteSociale; }
+
+    @Override
+    public void setNumeroSecuriteSociale(String numero) { this.numeroSecuriteSociale = numero; }
+
+    @Override
+    public boolean estPrisEnCharge() { return prisEnCharge; }
+
+    @Override
+    public void setPrisEnCharge(boolean prise) { this.prisEnCharge = prise; }
+
+    // -----------------------------------------------------------------------
 
     @Override
     public String toString() {
@@ -141,7 +163,9 @@ public class Patient extends Personne {
                 + " (" + getAge() + " ans) - " + getStatutAdmission();
     }
 
-
+    // -----------------------------------------------------------------------
+    // Getters et Setters
+    // -----------------------------------------------------------------------
 
     public String getNumeroPatient() { return numeroPatient; }
     public void setNumeroPatient(String numeroPatient) { this.numeroPatient = numeroPatient; }
@@ -151,6 +175,8 @@ public class Patient extends Personne {
 
     public List<String> getAntecedents() { return antecedents; }
     public void setAntecedents(List<String> antecedents) { this.antecedents = antecedents; }
+
+    public void setHistoriqueSoins(List<String> historiqueSoins) { this.historiqueSoins = historiqueSoins; }
 
     public LocalDate getDateAdmission() { return dateAdmission; }
     public void setDateAdmission(LocalDate dateAdmission) { this.dateAdmission = dateAdmission; }
