@@ -1,21 +1,10 @@
 /*
- * Fichier : PatientService.java
- * Projet : HospitApp - Gestion hospitalière
+ * PatientService.java - Couche service pour les patients (toute la logique métier).
+ * Les servlets appellent ce service ; ils ne font aucun traitement eux-mêmes.
  *
- * Rôle : Couche service pour les patients. C'est ici que se trouve toute la logique
- *        métier liée aux patients : CRUD, admission, recherche multicritères, tri.
- *        Les servlets appellent ce service et ne font aucun traitement eux-mêmes.
- *
- * Interactions : Registre<Patient>, Patient, PatientServlet, CsvService (Commit 8)
- *
- * Architecture MVC :
- *   - PatientServlet (contrôleur web) appelle PatientService
- *   - PatientService (logique métier) manipule Registre<Patient>
- *   - JSP (vue) affiche les données transmises par le servlet via request.setAttribute()
- *
- * Pattern Singleton : une seule instance de PatientService dans toute l'appli.
- *   Cela garantit que toutes les parties du code travaillent sur les mêmes données en mémoire.
- *   getInstance() crée l'instance si elle n'existe pas encore, sinon retourne l'existante.
+ * Pattern Singleton : une seule instance partagée dans toute l'application,
+ * ce qui garantit que tous les composants travaillent sur les mêmes données en mémoire.
+ * synchronized évite de créer deux instances si plusieurs requêtes arrivent simultanément.
  */
 
 package controller;
@@ -31,78 +20,37 @@ import java.util.stream.Collectors;
 
 public class PatientService {
 
-    // L'unique instance de ce service. private pour forcer l'accès via getInstance().
     private static PatientService instance;
-
-    // Le registre stocke tous les patients en mémoire.
-    // Registre<Patient> : on précise le type générique pour éviter les raw types.
     private final Registre<Patient> registre;
 
-    // Constructeur privé : empêche le code extérieur de faire "new PatientService()".
-    // Seule getInstance() peut créer l'instance.
     private PatientService() {
         this.registre = new Registre<>();
     }
 
-    /**
-     * Point d'accès unique à ce service.
-     * synchronized : si plusieurs requêtes HTTP arrivent en même temps (multi-threading),
-     * on évite de créer deux instances en parallèle.
-     */
     public static synchronized PatientService getInstance() {
-        if (instance == null) {
-            instance = new PatientService();
-        }
+        if (instance == null) instance = new PatientService();
         return instance;
     }
 
-    // -----------------------------------------------------------------------
-    // CRUD — Créer, Lire, Mettre à jour, Supprimer
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
+    // CRUD
+    // -------------------------------------------------------------------
 
-    /**
-     * Ajoute un nouveau patient dans le registre.
-     * On vérifie d'abord que l'objet n'est pas null pour éviter une NullPointerException.
-     */
     public void ajouter(Patient patient) {
-        if (patient == null) {
-            throw new DonneeInvalideException("L'objet patient ne peut pas être null.");
-        }
+        if (patient == null) throw new DonneeInvalideException("L'objet patient ne peut pas être null.");
         registre.ajouter(patient);
     }
 
-    /**
-     * Supprime un patient par son identifiant unique (UUID).
-     * Retourne true si la suppression a eu lieu, false si l'id n'existait pas.
-     */
-    public boolean supprimer(String id) {
-        return registre.supprimer(id);
-    }
+    public boolean supprimer(String id) { return registre.supprimer(id); }
 
-    /**
-     * Met à jour les données d'un patient existant.
-     * Le patient passé doit avoir le même id que celui déjà dans le registre.
-     */
     public void modifier(Patient patient) {
-        if (patient == null) {
-            throw new DonneeInvalideException("L'objet patient ne peut pas être null.");
-        }
+        if (patient == null) throw new DonneeInvalideException("L'objet patient ne peut pas être null.");
         registre.mettreAJour(patient);
     }
 
-    /**
-     * Recherche un patient par son id interne (UUID généré automatiquement).
-     * Retourne null si aucun patient ne correspond — le servlet gère ce cas avec un if.
-     */
-    public Patient trouverParId(String id) {
-        return registre.trouverParId(id);
-    }
+    public Patient trouverParId(String id) { return registre.trouverParId(id); }
 
-    /**
-     * Recherche un patient par son numéro métier lisible (ex : "P-2024-001").
-     * On parcourt la liste avec un stream et on retourne le premier résultat trouvé.
-     * findFirst() retourne un Optional : orElse(null) donne null si rien n'est trouvé.
-     */
+    // Recherche par numéro métier lisible (ex : "P-2024-001") plutôt que par UUID interne
     public Patient trouverParNumero(String numeroPatient) {
         if (numeroPatient == null || numeroPatient.isBlank()) return null;
         return registre.getTous().stream()
@@ -111,64 +59,31 @@ public class PatientService {
                 .orElse(null);
     }
 
-    /**
-     * Retourne la liste complète des patients dans l'ordre d'ajout.
-     * La liste retournée par getTous() est non-modifiable — protège les données internes.
-     */
-    public List<Patient> listerTous() {
-        return registre.getTous();
-    }
+    public List<Patient> listerTous() { return registre.getTous(); }
 
-    // -----------------------------------------------------------------------
-    // Actions métier — Admission et sortie
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
+    // Actions métier
+    // -------------------------------------------------------------------
 
-    /**
-     * Admet un patient dans une chambre de l'hôpital.
-     * Lève EntiteIntrouvableException si le patient n'existe pas.
-     * Lève DonneeInvalideException si le numéro de chambre est vide.
-     */
     public void admettre(String id, String chambre) {
         Patient patient = trouverParId(id);
-        if (patient == null) {
-            throw new EntiteIntrouvableException("Patient", id);
-        }
-        if (chambre == null || chambre.isBlank()) {
+        if (patient == null) throw new EntiteIntrouvableException("Patient", id);
+        if (chambre == null || chambre.isBlank())
             throw new DonneeInvalideException("chambre", "le numéro de chambre est obligatoire.");
-        }
         patient.admettre(chambre);
     }
 
-    /**
-     * Enregistre la sortie d'un patient hospitalisé.
-     * Lève EntiteIntrouvableException si le patient n'existe pas.
-     */
     public void sortir(String id) {
         Patient patient = trouverParId(id);
-        if (patient == null) {
-            throw new EntiteIntrouvableException("Patient", id);
-        }
+        if (patient == null) throw new EntiteIntrouvableException("Patient", id);
         patient.sortir();
     }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // Recherche multicritères avec Streams
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
-    /**
-     * Recherche des patients selon plusieurs critères combinés.
-     * Chaque critère est optionnel : s'il est null ou vide, il est simplement ignoré.
-     *
-     * Exemple d'appel :
-     *   rechercherMulticriteres("Dupont", true, "A+")
-     *   → patients dont le nom contient "Dupont", actuellement admis, groupe sanguin A+
-     *
-     * La chaîne de filter() est plus lisible et extensible que des if/else imbriqués.
-     *
-     * @param nom           Partie du nom de famille, insensible à la casse (null = ignoré)
-     * @param admis         true = admis seulement, false = non admis, null = tous
-     * @param groupeSanguin Groupe sanguin exact ex "A+" (null = ignoré)
-     */
+    // Chaque critère est optionnel : null ou vide = ignoré
     public List<Patient> rechercherMulticriteres(String nom, Boolean admis, String groupeSanguin) {
         return registre.getTous().stream()
                 .filter(p -> nom == null || nom.isBlank()
@@ -179,101 +94,54 @@ public class PatientService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Filtre les patients selon 3 critères, puis les trie selon la colonne et l'ordre choisis.
-     * Combine rechercherMulticriteres() et un tri dynamique en une seule passe.
-     * Si aucun critère n'est fourni et aucun tri demandé, retourne tous les patients.
-     *
-     * @param triColonne "nom" ou "date" (null = pas de tri)
-     * @param croissant  true = A→Z ou plus ancien en premier, false = inverse
-     */
+    // Filtre puis trie en une seule passe ; triColonne : "nom" ou "date"
     public List<Patient> rechercherEtTrier(String nom, Boolean admis, String groupeSanguin,
                                            String triColonne, boolean croissant) {
         List<Patient> resultats = rechercherMulticriteres(nom, admis, groupeSanguin);
         if ("date".equals(triColonne)) {
-            // nullsLast : patients sans date d'admission affichés en dernier dans les deux ordres
+            // nullsLast : patients sans date d'admission placés en dernier
             Comparator<Patient> comp = Comparator.comparing(
                     Patient::getDateAdmission, Comparator.nullsLast(Comparator.naturalOrder()));
             resultats.sort(croissant ? comp : comp.reversed());
         } else if ("nom".equals(triColonne)) {
-            Comparator<Patient> comp = Comparator.comparing(
-                    Patient::getNom, String.CASE_INSENSITIVE_ORDER);
+            Comparator<Patient> comp = Comparator.comparing(Patient::getNom, String.CASE_INSENSITIVE_ORDER);
             resultats.sort(croissant ? comp : comp.reversed());
         }
         return resultats;
     }
 
-    /**
-     * Retourne uniquement les patients actuellement hospitalisés.
-     * Utilise la méthode filtrer() du registre avec une référence de méthode.
-     * Patient::isAdmis est équivalent à p -> p.isAdmis().
-     */
-    public List<Patient> listerPatientsAdmis() {
-        return registre.filtrer(Patient::isAdmis);
-    }
+    public List<Patient> listerPatientsAdmis() { return registre.filtrer(Patient::isAdmis); }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // Tri dynamique
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
-    /**
-     * Retourne la liste des patients triée par nom de famille.
-     * Comparator.comparing() construit un comparateur à partir d'une méthode de référence.
-     * String.CASE_INSENSITIVE_ORDER : "dupont" et "Dupont" sont traités à égalité.
-     *
-     * @param croissant true = A→Z, false = Z→A
-     */
     public List<Patient> trierParNom(boolean croissant) {
-        Comparator<Patient> parNom = Comparator.comparing(
-                Patient::getNom, String.CASE_INSENSITIVE_ORDER
-        );
+        Comparator<Patient> parNom = Comparator.comparing(Patient::getNom, String.CASE_INSENSITIVE_ORDER);
         return registre.trierPar(croissant ? parNom : parNom.reversed());
     }
 
-    /**
-     * Retourne la liste des patients triée par date d'admission.
-     * Les patients sans date d'admission (non encore admis) sont placés en dernier.
-     * Comparator.nullsLast() gère les valeurs null sans planter.
-     *
-     * @param croissant true = du plus ancien au plus récent, false = inverse
-     */
+    // nullsLast : patients non encore admis (sans date) placés en dernier
     public List<Patient> trierParDateAdmission(boolean croissant) {
         Comparator<Patient> parDate = Comparator.comparing(
-                Patient::getDateAdmission,
-                Comparator.nullsLast(Comparator.naturalOrder())
-        );
+                Patient::getDateAdmission, Comparator.nullsLast(Comparator.naturalOrder()));
         return registre.trierPar(croissant ? parDate : parDate.reversed());
     }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // Statistiques
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
-    public int getNombre() {
-        return registre.getNombre();
-    }
+    public int getNombre()          { return registre.getNombre(); }
+    public long getNombreAdmis()    { return registre.compter(Patient::isAdmis); }
+    public long getNombreNonAdmis() { return registre.compter(p -> !p.isAdmis()); }
 
-    public long getNombreAdmis() {
-        return registre.compter(Patient::isAdmis);
-    }
-
-    public long getNombreNonAdmis() {
-        return registre.compter(p -> !p.isAdmis());
-    }
-
-    /**
-     * Calcule le chiffre d'affaires total généré par les séjours des patients.
-     * mapToDouble() transforme chaque patient en son montant de facturation.
-     * sum() additionne toutes ces valeurs en un seul passage sur la liste.
-     */
+    // mapToDouble transforme chaque patient en son montant, sum() les additionne
     public double getChiffreAffairesPatients() {
         return registre.getTous().stream()
                 .mapToDouble(Patient::calculerMontantTotal)
                 .sum();
     }
 
-    // Accès direct au registre, utilisé par le service de persistance au Commit 8
-    public Registre<Patient> getRegistre() {
-        return registre;
-    }
+    public Registre<Patient> getRegistre() { return registre; }
 }

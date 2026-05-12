@@ -1,18 +1,8 @@
 /*
- * Fichier : Soin.java
- * Projet : HospitApp - Gestion hospitalière
- *
- * Rôle : Classe abstraite représentant tout acte médical dans le système.
- *        Consultation et ActeChirurgical héritent de cette classe.
- *        Elle factorise les attributs communs à tous les soins :
- *        date, patient concerné, médecin responsable, coût.
- *
- * Interactions : Entite (parent), Consultation (sous-classe), ActeChirurgical (sous-classe),
- *                SoinService, PatientService
- *
- * On stocke le numéro du patient et le matricule du médecin comme Strings
- * plutôt que comme références d'objets. Cela évite des dépendances circulaires
- * lors du chargement CSV (on chargerait Soin avant Patient ou inversement).
+ * Soin.java - Classe abstraite représentant tout acte médical.
+ * Consultation et ActeChirurgical héritent de cette classe.
+ * On stocke les références au patient et au médecin par String (numéro/matricule)
+ * plutôt que par objet, pour éviter des dépendances circulaires au chargement CSV.
  */
 
 package model;
@@ -21,24 +11,11 @@ import java.time.LocalDate;
 
 public abstract class Soin extends Entite {
 
-    // Description générale de l'acte médical
     private String description;
-
-    // Date à laquelle le soin a été effectué
     private LocalDate dateSoin;
-
-    // Référence au patient (par son numéro lisible, ex : "P-001")
     private String numeroPatient;
-
-    // Référence au médecin qui a réalisé le soin (par son matricule, ex : "MED-001")
     private String matriculeMedecin;
-
-    // Coût du soin en euros
     private double cout;
-
-    // -----------------------------------------------------------------------
-    // Constructeurs
-    // -----------------------------------------------------------------------
 
     public Soin(String description, String numeroPatient, String matriculeMedecin) {
         super();
@@ -49,6 +26,7 @@ public abstract class Soin extends Entite {
         this.cout = 0.0;
     }
 
+    // Constructeur de rechargement CSV
     public Soin(String id, String description, LocalDate dateSoin,
                 String numeroPatient, String matriculeMedecin, double cout) {
         super(id);
@@ -59,19 +37,13 @@ public abstract class Soin extends Entite {
         this.cout = cout;
     }
 
-    // -----------------------------------------------------------------------
-    // Méthode abstraite
-    // -----------------------------------------------------------------------
-
-    /**
-     * Chaque sous-classe retourne son type de soin.
-     * Exemples : "Consultation", "Acte Chirurgical"
-     */
+    // Chaque sous-classe retourne son type : "Consultation" ou "Acte Chirurgical"
     public abstract String getTypeSoin();
 
-    // -----------------------------------------------------------------------
-    // Getters et Setters
-    // -----------------------------------------------------------------------
+    @Override
+    public String toString() {
+        return "[" + getTypeSoin() + "] " + description + " - Patient : " + numeroPatient;
+    }
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
@@ -87,9 +59,4 @@ public abstract class Soin extends Entite {
 
     public double getCout() { return cout; }
     public void setCout(double cout) { this.cout = cout; }
-
-    @Override
-    public String toString() {
-        return "[" + getTypeSoin() + "] " + description + " - Patient : " + numeroPatient;
-    }
 }

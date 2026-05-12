@@ -1,16 +1,9 @@
 /*
- * Fichier : PersonnelServlet.java
- * Projet : HospitApp - Gestion hospitalière
+ * PersonnelServlet.java - Contrôleur web pour le personnel (médecins et infirmiers).
+ * Gère les deux types dans un même servlet grâce au paramètre "type" ("medecin" ou "infirmier").
  *
- * Rôle : Contrôleur web pour le personnel hospitalier (médecins et infirmiers).
- *        Gère les deux types dans un même servlet en distinguant via le paramètre "type"
- *        ("medecin" ou "infirmier").
- *
- * Interactions : PersonnelService, CsvService,
- *                JSP : personnel/liste.jsp, formulaire-medecin.jsp, formulaire-infirmier.jsp
- *
- * Actions GET  : list, nouveauMedecin, nouveauInfirmier, editerMedecin, editerInfirmier
- * Actions POST : ajouterMedecin, ajouterInfirmier, modifierMedecin, modifierInfirmier, supprimer
+ * GET  : list, nouveauMedecin, nouveauInfirmier, editerMedecin, editerInfirmier
+ * POST : ajouterMedecin, ajouterInfirmier, modifierMedecin, modifierInfirmier, supprimer
  */
 
 package servlet;
@@ -43,9 +36,9 @@ public class PersonnelServlet extends HttpServlet {
         personnelService = PersonnelService.getInstance();
     }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // GET
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -55,11 +48,11 @@ public class PersonnelServlet extends HttpServlet {
         if (action == null) action = "list";
 
         switch (action) {
-            case "nouveauMedecin"    -> afficherFormMedecin(req, resp, null);
-            case "nouveauInfirmier"  -> afficherFormInfirmier(req, resp, null);
-            case "editerMedecin"     -> afficherFormMedecin(req, resp, req.getParameter("id"));
-            case "editerInfirmier"   -> afficherFormInfirmier(req, resp, req.getParameter("id"));
-            default                  -> listerPersonnel(req, resp);
+            case "nouveauMedecin"   -> afficherFormMedecin(req, resp, null);
+            case "nouveauInfirmier" -> afficherFormInfirmier(req, resp, null);
+            case "editerMedecin"    -> afficherFormMedecin(req, resp, req.getParameter("id"));
+            case "editerInfirmier"  -> afficherFormInfirmier(req, resp, req.getParameter("id"));
+            default                 -> listerPersonnel(req, resp);
         }
     }
 
@@ -67,11 +60,10 @@ public class PersonnelServlet extends HttpServlet {
             throws ServletException, IOException {
         String nom        = req.getParameter("nom");
         String type       = req.getParameter("type");       // "medecin", "infirmier", ou null = tous
-        String specialite = req.getParameter("specialite"); // correspond à spécialité OU service
+        String specialite = req.getParameter("specialite"); // spécialité ou service selon le type
         String triOrdre   = req.getParameter("ordre");
         boolean croissant = !"desc".equals(triOrdre);
 
-        // Si type="infirmier", on ne remonte aucun médecin (et inversement)
         List<Medecin> medecins = "infirmier".equals(type)
                 ? new ArrayList<>()
                 : personnelService.rechercherMedecins(nom, specialite, croissant);
@@ -102,9 +94,9 @@ public class PersonnelServlet extends HttpServlet {
         forward(req, resp, "/WEB-INF/views/personnel/formulaire-infirmier.jsp");
     }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // POST
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -114,11 +106,11 @@ public class PersonnelServlet extends HttpServlet {
         if (action == null) action = "";
 
         switch (action) {
-            case "ajouterMedecin"   -> ajouterMedecin(req, resp);
-            case "ajouterInfirmier" -> ajouterInfirmier(req, resp);
-            case "modifierMedecin"  -> modifierMedecin(req, resp);
-            case "modifierInfirmier"-> modifierInfirmier(req, resp);
-            case "supprimer"        -> supprimer(req, resp);
+            case "ajouterMedecin"    -> ajouterMedecin(req, resp);
+            case "ajouterInfirmier"  -> ajouterInfirmier(req, resp);
+            case "modifierMedecin"   -> modifierMedecin(req, resp);
+            case "modifierInfirmier" -> modifierInfirmier(req, resp);
+            case "supprimer"         -> supprimer(req, resp);
             default -> resp.sendRedirect(req.getContextPath() + "/personnel");
         }
     }
@@ -215,19 +207,16 @@ public class PersonnelServlet extends HttpServlet {
             throws IOException {
         String id   = req.getParameter("id");
         String type = req.getParameter("type");
-        if ("infirmier".equals(type)) {
-            personnelService.supprimerInfirmier(id);
-        } else {
-            personnelService.supprimerMedecin(id);
-        }
+        if ("infirmier".equals(type)) personnelService.supprimerInfirmier(id);
+        else personnelService.supprimerMedecin(id);
         sauvegarder();
         message(req, "Membre du personnel supprimé.", "warning");
         resp.sendRedirect(req.getContextPath() + "/personnel");
     }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // Utilitaires
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
     private String str(String s) { return (s == null || s.isBlank()) ? null : s.trim(); }
 

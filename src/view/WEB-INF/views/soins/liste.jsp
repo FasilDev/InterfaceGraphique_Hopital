@@ -156,7 +156,7 @@
                                         <small>
                                             <c:choose>
                                                 <c:when test="${not empty c.diagnostic}">${c.diagnostic}</c:when>
-                                                <c:otherwise class="text-muted">—</c:otherwise>
+                                                <c:otherwise>—</c:otherwise>
                                             </c:choose>
                                         </small>
                                     </td>

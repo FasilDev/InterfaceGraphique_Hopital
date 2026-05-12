@@ -1,25 +1,12 @@
 /*
- * Fichier : PatientServlet.java
- * Projet : HospitApp - Gestion hospitalière
+ * PatientServlet.java - Contrôleur web pour les patients (architecture MVC).
+ * Reçoit les requêtes HTTP, délègue le traitement à PatientService, transmet les données aux JSP.
  *
- * Rôle : Contrôleur web pour les patients.
- *        Reçoit les requêtes HTTP, appelle PatientService, et transmet les données aux JSP.
- *        Ce servlet ne contient aucune logique métier — il délègue tout au service.
+ * Pattern PRG (Post/Redirect/Get) : après un POST, on redirige vers un GET
+ * pour éviter le double-envoi si l'utilisateur actualise la page.
  *
- * Interactions : PatientService, SoinService, CsvService,
- *                JSP : patients/liste.jsp, detail.jsp, formulaire.jsp
- *
- * Architecture MVC appliquée ici :
- *   - Modèle  : Patient, PatientService (traitement des données)
- *   - Vue     : JSP (affichage uniquement)
- *   - Contrôleur : ce servlet (fait le lien entre les deux)
- *
- * Pattern PRG (Post/Redirect/Get) :
- *   Après un POST (ajout, modification, suppression), on REDIRIGE vers un GET.
- *   Cela évite le double-envoi du formulaire si l'utilisateur actualise la page.
- *
- * Actions GET  : list, detail, nouveau, editer
- * Actions POST : ajouter, modifier, supprimer, admettre, sortir
+ * GET  : list, detail, nouveau, editer
+ * POST : ajouter, modifier, supprimer, admettre, sortir, ajouterAntecedent
  */
 
 package servlet;
@@ -52,9 +39,9 @@ public class PatientServlet extends HttpServlet {
         soinService    = SoinService.getInstance();
     }
 
-    // -----------------------------------------------------------------------
-    // GET — affichage des pages
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
+    // GET
+    // -------------------------------------------------------------------
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -73,25 +60,24 @@ public class PatientServlet extends HttpServlet {
 
     private void listerPatients(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // Lecture des paramètres de filtre et de tri (tous optionnels)
         String nom           = req.getParameter("nom");
         String admisParam    = req.getParameter("admis");
         String groupeSanguin = req.getParameter("groupeSanguin");
         String triColonne    = req.getParameter("tri");
         String triOrdre      = req.getParameter("ordre");
 
-        // "true"/"false" → Boolean, vide ou absent → null (= pas de filtre sur ce critère)
+        // "true"/"false" -> Boolean, absent -> null (pas de filtre)
         Boolean admis = (admisParam == null || admisParam.isBlank())
                 ? null : Boolean.parseBoolean(admisParam);
         boolean croissant = !"desc".equals(triOrdre);
 
-        req.setAttribute("patients",              patientService.rechercherEtTrier(nom, admis, groupeSanguin, triColonne, croissant));
-        // On repasse les critères à la JSP pour pré-remplir les champs du formulaire de recherche
-        req.setAttribute("critereNom",            nom);
-        req.setAttribute("critereAdmis",          admisParam);
-        req.setAttribute("critereGroupeSanguin",  groupeSanguin);
-        req.setAttribute("triColonne",            triColonne);
-        req.setAttribute("triOrdre",              triOrdre);
+        req.setAttribute("patients",             patientService.rechercherEtTrier(nom, admis, groupeSanguin, triColonne, croissant));
+        // On repasse les critères à la JSP pour pré-remplir les champs de recherche
+        req.setAttribute("critereNom",           nom);
+        req.setAttribute("critereAdmis",         admisParam);
+        req.setAttribute("critereGroupeSanguin", groupeSanguin);
+        req.setAttribute("triColonne",           triColonne);
+        req.setAttribute("triOrdre",             triOrdre);
         forward(req, resp, "/WEB-INF/views/patients/liste.jsp");
     }
 
@@ -105,22 +91,19 @@ public class PatientServlet extends HttpServlet {
             return;
         }
         req.setAttribute("patient", patient);
-        // Historique des soins du patient (consultations + actes)
         req.setAttribute("soins", soinService.listerSoinsParPatient(patient.getNumeroPatient()));
         forward(req, resp, "/WEB-INF/views/patients/detail.jsp");
     }
 
     private void afficherFormulaire(HttpServletRequest req, HttpServletResponse resp, String id)
             throws ServletException, IOException {
-        if (id != null) {
-            req.setAttribute("patient", patientService.trouverParId(id));
-        }
+        if (id != null) req.setAttribute("patient", patientService.trouverParId(id));
         forward(req, resp, "/WEB-INF/views/patients/formulaire.jsp");
     }
 
-    // -----------------------------------------------------------------------
-    // POST — traitement des formulaires
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
+    // POST
+    // -------------------------------------------------------------------
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -143,7 +126,7 @@ public class PatientServlet extends HttpServlet {
     private void ajouterPatient(HttpServletRequest req, HttpServletResponse resp)
             throws IOException {
         try {
-            // Génération automatique du numéro patient (ex : "P-2025-006")
+            // Génération du numéro patient lisible (ex : "P-2025-006")
             String numero = "P-" + Year.now().getValue() + "-"
                     + String.format("%03d", patientService.getNombre() + 1);
             Patient p = new Patient(
@@ -233,27 +216,23 @@ public class PatientServlet extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/patients?action=detail&id=" + id);
     }
 
-    // -----------------------------------------------------------------------
-    // Méthodes utilitaires privées
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
+    // Utilitaires privés
+    // -------------------------------------------------------------------
 
-    // Remplit les champs non obligatoires depuis les paramètres du formulaire
     private void remplirChampsFacultatifs(Patient p, HttpServletRequest req) {
         p.setGroupeSanguin(str(req.getParameter("groupeSanguin")));
         p.setTelephone(str(req.getParameter("telephone")));
         p.setEmail(str(req.getParameter("email")));
         p.setNotes(str(req.getParameter("notes")));
         p.setNumeroSecuriteSociale(str(req.getParameter("numeroSecuriteSociale")));
-        // checkbox HTML : envoie "on" si cochée, rien si décochée
+        // Une checkbox HTML envoie "on" si cochée, rien si décochée
         p.setPrisEnCharge("on".equals(req.getParameter("prisEnCharge")));
     }
 
-    // null ou vide → null ; sinon trim
-    private String str(String s) {
-        return (s == null || s.isBlank()) ? null : s.trim();
-    }
+    private String str(String s) { return (s == null || s.isBlank()) ? null : s.trim(); }
 
-    // Stocke un message flash en session (visible après redirect)
+    // Stocke un message en session pour l'afficher après la redirection
     private void message(HttpServletRequest req, String texte, String type) {
         req.getSession().setAttribute("message", texte);
         req.getSession().setAttribute("messageType", type);

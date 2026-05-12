@@ -1,16 +1,9 @@
 /*
- * Fichier : UrgenceServlet.java
- * Projet : HospitApp - Gestion hospitalière
+ * UrgenceServlet.java - Contrôleur web pour la file d'urgences.
+ * "Traiter" retire l'acte le plus prioritaire de la PriorityQueue et le marque comme réalisé.
  *
- * Rôle : Contrôleur web pour la file d'urgences.
- *        Gère les actes chirurgicaux urgents et la PriorityQueue sous-jacente.
- *        "Traiter" retire l'acte le plus urgent de la file (poll) et le marque comme réalisé.
- *
- * Interactions : SoinService (qui encapsule FileUrgences), PatientService, PersonnelService,
- *                CsvService, JSP : urgences/liste.jsp, urgences/formulaire-urgence.jsp
- *
- * Actions GET  : list, nouvelleUrgence
- * Actions POST : ajouterUrgence, traiter
+ * GET  : list, nouvelleUrgence
+ * POST : ajouterUrgence, traiter
  */
 
 package servlet;
@@ -43,9 +36,9 @@ public class UrgenceServlet extends HttpServlet {
         personnelService = PersonnelService.getInstance();
     }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // GET
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -62,10 +55,9 @@ public class UrgenceServlet extends HttpServlet {
 
     private void listerUrgences(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
-        // Liste triée par priorité médicale (niveau 1 en tête)
-        req.setAttribute("urgences",          soinService.listerUrgencesEnAttente());
-        req.setAttribute("prochaineUrgence",  soinService.voirProchaineUrgence());
-        req.setAttribute("nbUrgences",        soinService.getNombreUrgencesEnAttente());
+        req.setAttribute("urgences",         soinService.listerUrgencesEnAttente());
+        req.setAttribute("prochaineUrgence", soinService.voirProchaineUrgence());
+        req.setAttribute("nbUrgences",       soinService.getNombreUrgencesEnAttente());
         forward(req, resp, "/WEB-INF/views/urgences/liste.jsp");
     }
 
@@ -76,9 +68,9 @@ public class UrgenceServlet extends HttpServlet {
         forward(req, resp, "/WEB-INF/views/urgences/formulaire-urgence.jsp");
     }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // POST
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -128,9 +120,9 @@ public class UrgenceServlet extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/urgences");
     }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // Utilitaires
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
     private String str(String s) { return (s == null || s.isBlank()) ? null : s.trim(); }
 

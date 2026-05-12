@@ -1,15 +1,9 @@
 /*
- * Fichier : SoinServlet.java
- * Projet : HospitApp - Gestion hospitalière
+ * SoinServlet.java - Contrôleur web pour les consultations médicales.
+ * Les actes chirurgicaux urgents sont gérés séparément par UrgenceServlet.
  *
- * Rôle : Contrôleur web pour les consultations médicales.
- *        Les actes chirurgicaux urgents sont gérés par UrgenceServlet.
- *
- * Interactions : SoinService, PatientService, PersonnelService, CsvService,
- *                JSP : soins/liste.jsp, soins/formulaire-consultation.jsp
- *
- * Actions GET  : list, nouvelleCons, editerCons
- * Actions POST : ajouterCons, modifierCons, supprimerCons
+ * GET  : list, nouvelleCons, editerCons
+ * POST : ajouterCons, modifierCons, supprimerCons
  */
 
 package servlet;
@@ -44,9 +38,9 @@ public class SoinServlet extends HttpServlet {
         personnelService = PersonnelService.getInstance();
     }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // GET
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
@@ -66,12 +60,11 @@ public class SoinServlet extends HttpServlet {
             throws ServletException, IOException {
         String numeroPatient    = req.getParameter("numeroPatient");
         String matriculeMedecin = req.getParameter("matriculeMedecin");
-        String type             = req.getParameter("type");   // "consultation", "acte", ou null = tous
-        String ordre            = req.getParameter("ordre");  // "asc" ou "desc"
-        boolean croissant       = !"desc".equals(ordre);      // par défaut : plus récent en premier = desc
+        String type             = req.getParameter("type");  // "consultation", "acte", ou null = tous
+        String ordre            = req.getParameter("ordre");
+        boolean croissant       = !"desc".equals(ordre);
 
-        // Si on filtre par type, on vide la liste de l'autre type pour éviter de l'afficher
-        List<Consultation>    consultations = "acte".equals(type)
+        List<Consultation> consultations = "acte".equals(type)
                 ? java.util.Collections.emptyList()
                 : soinService.rechercherConsultations(numeroPatient, matriculeMedecin, croissant);
 
@@ -79,27 +72,27 @@ public class SoinServlet extends HttpServlet {
                 ? java.util.Collections.emptyList()
                 : soinService.rechercherActes(numeroPatient, matriculeMedecin, croissant);
 
-        req.setAttribute("consultations",         consultations);
-        req.setAttribute("actes",                 actes);
-        req.setAttribute("criterePatient",        numeroPatient);
-        req.setAttribute("critereMedecin",        matriculeMedecin);
-        req.setAttribute("critereType",           type);
-        req.setAttribute("triOrdre",              ordre);
+        req.setAttribute("consultations",  consultations);
+        req.setAttribute("actes",          actes);
+        req.setAttribute("criterePatient", numeroPatient);
+        req.setAttribute("critereMedecin", matriculeMedecin);
+        req.setAttribute("critereType",    type);
+        req.setAttribute("triOrdre",       ordre);
         forward(req, resp, "/WEB-INF/views/soins/liste.jsp");
     }
 
     private void afficherFormConsultation(HttpServletRequest req, HttpServletResponse resp, String id)
             throws ServletException, IOException {
         if (id != null) req.setAttribute("consultation", soinService.trouverConsultationParId(id));
-        // Les listes sont nécessaires pour remplir les menus déroulants du formulaire
+        // Listes nécessaires pour remplir les menus déroulants du formulaire
         req.setAttribute("patients", patientService.listerTous());
         req.setAttribute("medecins", personnelService.listerMedecins());
         forward(req, resp, "/WEB-INF/views/soins/formulaire-consultation.jsp");
     }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // POST
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp)
@@ -162,9 +155,9 @@ public class SoinServlet extends HttpServlet {
         resp.sendRedirect(req.getContextPath() + "/soins");
     }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // Utilitaires
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
     private String str(String s) { return (s == null || s.isBlank()) ? null : s.trim(); }
 

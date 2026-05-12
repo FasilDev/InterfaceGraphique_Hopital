@@ -1,19 +1,7 @@
 /*
- * Fichier : Medecin.java
- * Projet : HospitApp - Gestion hospitalière
- *
- * Rôle : Représente un médecin de l'hôpital.
- *
- * Interfaces implémentées :
- *   - Soignable : le médecin effectue des soins (historique des actes réalisés)
- *   - Planifiable : le médecin a un planning de créneaux de consultation
- *
- * Note sur estDisponible() / setDisponible() :
- *   Ces méthodes sont déclarées dans Planifiable et déjà implémentées dans Personnel.
- *   Medecin hérite de Personnel, donc le contrat de l'interface est automatiquement satisfait
- *   sans qu'on ait besoin de réécrire ces méthodes ici.
- *
- * Interactions : Personnel (parent), PersonnelService, PersonnelServlet
+ * Medecin.java - Représente un médecin de l'hôpital.
+ * Implements Soignable (historique des actes réalisés) et Planifiable (créneaux).
+ * Note : estDisponible() / setDisponible() sont hérités de Personnel.
  */
 
 package model;
@@ -28,17 +16,8 @@ public class Medecin extends Personnel implements Soignable, Planifiable {
 
     private String specialite;
     private String numeroOrdre;
-
-    // Historique des soins effectués par ce médecin
     private List<String> historiqueSoins;
-
-    // Planning : chaque date est associée à un créneau horaire
-    // On utilise HashMap ici (pas TreeMap) car le tri par date se fera via Stream au besoin
     private Map<LocalDate, String> planning;
-
-    // -----------------------------------------------------------------------
-    // Constructeurs
-    // -----------------------------------------------------------------------
 
     public Medecin(String nom, String prenom, LocalDate dateNaissance,
                    String matricule, String specialite, String numeroOrdre) {
@@ -49,6 +28,7 @@ public class Medecin extends Personnel implements Soignable, Planifiable {
         this.planning = new HashMap<>();
     }
 
+    // Constructeur de rechargement CSV
     public Medecin(String id, String nom, String prenom, LocalDate dateNaissance,
                    String matricule, String specialite, String numeroOrdre) {
         super(id, nom, prenom, dateNaissance, matricule, specialite);
@@ -58,24 +38,15 @@ public class Medecin extends Personnel implements Soignable, Planifiable {
         this.planning = new HashMap<>();
     }
 
-    // -----------------------------------------------------------------------
-    // Implémentation méthode abstraite de Personnel
-    // -----------------------------------------------------------------------
-
     @Override
-    public String getRole() {
-        return "Médecin";
-    }
+    public String getRole() { return "Médecin"; }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // Implémentation de Soignable
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
-    // Pour un médecin, l'historique contient les soins qu'il a réalisés
     @Override
-    public List<String> getHistoriqueSoins() {
-        return historiqueSoins;
-    }
+    public List<String> getHistoriqueSoins() { return historiqueSoins; }
 
     @Override
     public void ajouterSoin(String descriptionSoin) {
@@ -84,22 +55,15 @@ public class Medecin extends Personnel implements Soignable, Planifiable {
         }
     }
 
-    // Un médecin n'a pas d'antécédents médicaux dans ce contexte (il soigne, il ne reçoit pas)
     @Override
-    public boolean aDesAntecedents() {
-        return false;
-    }
+    public boolean aDesAntecedents() { return false; }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // Implémentation de Planifiable
-    // -----------------------------------------------------------------------
-
-    // estDisponible() et setDisponible() sont hérités de Personnel — pas besoin de les réécrire
+    // -------------------------------------------------------------------
 
     @Override
-    public boolean estDisponible() {
-        return false;
-    }
+    public boolean estDisponible() { return isDisponible(); }
 
     @Override
     public void ajouterCreneau(LocalDate date, String horaire) {
@@ -109,20 +73,16 @@ public class Medecin extends Personnel implements Soignable, Planifiable {
     }
 
     @Override
-    public Map<LocalDate, String> getPlanning() {
-        return planning;
-    }
-
-    // -----------------------------------------------------------------------
+    public Map<LocalDate, String> getPlanning() { return planning; }
 
     @Override
     public String toString() {
         return "Dr. " + getNomComplet() + " [" + specialite + "] - " + getMatricule();
     }
 
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
     // Getters et Setters
-    // -----------------------------------------------------------------------
+    // -------------------------------------------------------------------
 
     public String getSpecialite() { return specialite; }
 
