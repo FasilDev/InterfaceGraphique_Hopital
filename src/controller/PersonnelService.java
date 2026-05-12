@@ -19,6 +19,7 @@
 
 package controller;
 
+import model.DonneeInvalideException;
 import model.Infirmier;
 import model.Medecin;
 import model.Personnel;
@@ -54,12 +55,8 @@ public class PersonnelService {
     // Médecins — CRUD
     // -----------------------------------------------------------------------
 
-    /**
-     * Ajoute un médecin dans le registre.
-     * TODO Commit 7 : remplacer IllegalArgumentException par DonneeInvalideException
-     */
     public void ajouterMedecin(Medecin medecin) {
-        if (medecin == null) throw new IllegalArgumentException("Médecin invalide.");
+        if (medecin == null) throw new DonneeInvalideException("L'objet médecin ne peut pas être null.");
         registreMedecins.ajouter(medecin);
     }
 
@@ -68,7 +65,7 @@ public class PersonnelService {
     }
 
     public void modifierMedecin(Medecin medecin) {
-        if (medecin == null) throw new IllegalArgumentException("Médecin invalide.");
+        if (medecin == null) throw new DonneeInvalideException("L'objet médecin ne peut pas être null.");
         registreMedecins.mettreAJour(medecin);
     }
 
@@ -96,12 +93,8 @@ public class PersonnelService {
     // Infirmiers — CRUD
     // -----------------------------------------------------------------------
 
-    /**
-     * Ajoute un infirmier dans le registre.
-     * TODO Commit 7 : remplacer IllegalArgumentException par DonneeInvalideException
-     */
     public void ajouterInfirmier(Infirmier infirmier) {
-        if (infirmier == null) throw new IllegalArgumentException("Infirmier invalide.");
+        if (infirmier == null) throw new DonneeInvalideException("L'objet infirmier ne peut pas être null.");
         registreInfirmiers.ajouter(infirmier);
     }
 
@@ -110,7 +103,7 @@ public class PersonnelService {
     }
 
     public void modifierInfirmier(Infirmier infirmier) {
-        if (infirmier == null) throw new IllegalArgumentException("Infirmier invalide.");
+        if (infirmier == null) throw new DonneeInvalideException("L'objet infirmier ne peut pas être null.");
         registreInfirmiers.mettreAJour(infirmier);
     }
 

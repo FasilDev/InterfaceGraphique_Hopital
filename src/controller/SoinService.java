@@ -21,6 +21,7 @@ package controller;
 
 import model.ActeChirurgical;
 import model.Consultation;
+import model.DonneeInvalideException;
 import model.FileUrgences;
 import model.Soin;
 import util.Registre;
@@ -60,11 +61,10 @@ public class SoinService {
 
     /**
      * Ajoute une consultation dans le registre.
-     * TODO Commit 7 : remplacer IllegalArgumentException par DonneeInvalideException
      */
     public void ajouterConsultation(Consultation consultation) {
         if (consultation == null) {
-            throw new IllegalArgumentException("Consultation invalide.");
+            throw new DonneeInvalideException("L'objet consultation ne peut pas être null.");
         }
         registreConsultations.ajouter(consultation);
     }
@@ -74,7 +74,7 @@ public class SoinService {
     }
 
     public void modifierConsultation(Consultation consultation) {
-        if (consultation == null) throw new IllegalArgumentException("Consultation invalide.");
+        if (consultation == null) throw new DonneeInvalideException("L'objet consultation ne peut pas être null.");
         registreConsultations.mettreAJour(consultation);
     }
 
@@ -108,7 +108,7 @@ public class SoinService {
      */
     public void ajouterActeChirurgical(ActeChirurgical acte) {
         if (acte == null) {
-            throw new IllegalArgumentException("Acte chirurgical invalide.");
+            throw new DonneeInvalideException("L'objet acte chirurgical ne peut pas être null.");
         }
         registreActes.ajouter(acte);
         // Un acte en attente est une urgence à traiter : on l'ajoute à la file
@@ -126,7 +126,7 @@ public class SoinService {
     }
 
     public void modifierActe(ActeChirurgical acte) {
-        if (acte == null) throw new IllegalArgumentException("Acte invalide.");
+        if (acte == null) throw new DonneeInvalideException("L'objet acte ne peut pas être null.");
         registreActes.mettreAJour(acte);
     }
 

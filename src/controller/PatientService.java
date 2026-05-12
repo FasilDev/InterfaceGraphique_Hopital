@@ -20,6 +20,8 @@
 
 package controller;
 
+import model.DonneeInvalideException;
+import model.EntiteIntrouvableException;
 import model.Patient;
 import util.Registre;
 
@@ -61,11 +63,10 @@ public class PatientService {
     /**
      * Ajoute un nouveau patient dans le registre.
      * On vérifie d'abord que l'objet n'est pas null pour éviter une NullPointerException.
-     * TODO Commit 7 : remplacer IllegalArgumentException par DonneeInvalideException
      */
     public void ajouter(Patient patient) {
         if (patient == null) {
-            throw new IllegalArgumentException("Impossible d'ajouter un patient null.");
+            throw new DonneeInvalideException("L'objet patient ne peut pas être null.");
         }
         registre.ajouter(patient);
     }
@@ -84,15 +85,14 @@ public class PatientService {
      */
     public void modifier(Patient patient) {
         if (patient == null) {
-            throw new IllegalArgumentException("Patient invalide.");
+            throw new DonneeInvalideException("L'objet patient ne peut pas être null.");
         }
         registre.mettreAJour(patient);
     }
 
     /**
      * Recherche un patient par son id interne (UUID généré automatiquement).
-     * Retourne null si aucun patient ne correspond.
-     * TODO Commit 7 : lever EntiteIntrouvableException plutôt que retourner null
+     * Retourne null si aucun patient ne correspond — le servlet gère ce cas avec un if.
      */
     public Patient trouverParId(String id) {
         return registre.trouverParId(id);
@@ -125,27 +125,28 @@ public class PatientService {
 
     /**
      * Admet un patient dans une chambre de l'hôpital.
-     * Si le patient n'existe pas ou si la chambre est vide, on lève une exception.
-     * TODO Commit 7 : lever EntiteIntrouvableException si patient introuvable
+     * Lève EntiteIntrouvableException si le patient n'existe pas.
+     * Lève DonneeInvalideException si le numéro de chambre est vide.
      */
     public void admettre(String id, String chambre) {
         Patient patient = trouverParId(id);
         if (patient == null) {
-            throw new IllegalArgumentException("Patient introuvable, admission impossible : " + id);
+            throw new EntiteIntrouvableException("Patient", id);
         }
         if (chambre == null || chambre.isBlank()) {
-            throw new IllegalArgumentException("Le numéro de chambre est obligatoire.");
+            throw new DonneeInvalideException("chambre", "le numéro de chambre est obligatoire.");
         }
         patient.admettre(chambre);
     }
 
     /**
      * Enregistre la sortie d'un patient hospitalisé.
+     * Lève EntiteIntrouvableException si le patient n'existe pas.
      */
     public void sortir(String id) {
         Patient patient = trouverParId(id);
         if (patient == null) {
-            throw new IllegalArgumentException("Patient introuvable, sortie impossible : " + id);
+            throw new EntiteIntrouvableException("Patient", id);
         }
         patient.sortir();
     }
