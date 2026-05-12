@@ -75,6 +75,14 @@
         <!-- Nom du fichier WAR généré : HospitApp.war dans target/ -->
         <finalName>HospitApp</finalName>
 
+        <!--
+            On indique à Maven que les sources Java sont directement dans src/
+            et non dans le chemin Maven par défaut (src/main/java).
+            Cela correspond à la structure simplifiée du projet :
+            src/model/, src/controller/, src/view/, src/util/
+        -->
+        <sourceDirectory>src</sourceDirectory>
+
         <plugins>
             <!--
                 Plugin Maven WAR : construit le fichier .war à partir des sources.
@@ -86,7 +94,7 @@
                 <version>3.4.0</version>
                 <configuration>
                     <!-- Chemin vers le dossier des ressources web (JSP, CSS, images…) -->
-                    <warSourceDirectory>src/main/webapp</warSourceDirectory>
+                    <warSourceDirectory>src/view</warSourceDirectory>
                     <!--
                         failOnMissingWebXml = false : ne pas échouer si web.xml est absent.
                         (On l'a quand même, mais bonne pratique de mettre false en Jakarta EE)

@@ -12,20 +12,20 @@
 
 ## Description
 
-**HospitApp** est une application web Java de gestion hospitalière développée dans le cadre du projet de **POO Avancée en Bachelor 3 Informatique**.
+**HospitApp** est une application web Java de gestion hospitalière, développée dans le cadre du projet POO Avancée en Bachelor 3 Informatique.
 
-Elle permet de gérer les **patients** (admission, dossier médical, sortie), le **personnel médical** (médecins, infirmiers, spécialités, plannings), les **soins** (consultations, prescriptions, actes chirurgicaux), la **disponibilité des salles et lits**, et la **file d'attente des urgences** ordonnée par priorité médicale. L'interface web est simple, intuitive et responsive grâce à Bootstrap 5. Les données sont persistées en CSV pour faciliter la compréhension et la portabilité.
+L'application couvre la gestion des **patients** (admission, dossier médical, sortie), du **personnel médical** (médecins, infirmiers, spécialités, plannings), des **soins** (consultations, prescriptions, actes chirurgicaux), des **salles et lits** (occupation, disponibilité), et d'une **file d'attente des urgences** triée par priorité médicale. L'interface est responsive grâce à Bootstrap 5. Les données sont sauvegardées en CSV.
 
 ---
 
 ## Technologie choisie : Option B — Servlet/JSP (Tomcat 10.1+)
 
-**Justification :** L'option Servlet/JSP a été choisie pour appliquer le pattern **MVC côté serveur** de manière explicite et pédagogique :
-- Les **Servlets** jouent le rôle de **contrôleurs** (reçoivent les requêtes HTTP, appellent les services, transmettent les données aux vues).
-- Les **JSP** jouent le rôle de **vues** (affichent les données sans contenir de logique métier).
-- Les **classes Java métier** forment le **modèle**, totalement indépendant du web.
+On a choisi Servlet/JSP pour avoir un MVC côté serveur clair et explicite :
+- Les **Servlets** reçoivent les requêtes HTTP, appellent les services et transmettent les données aux vues.
+- Les **JSP** affichent les données — elles ne contiennent pas de logique métier.
+- Le **modèle Java** est totalement indépendant du web.
 
-Cette architecture prépare à des frameworks plus avancés (Spring MVC) rencontrés en master.
+C'est une bonne base pour comprendre comment fonctionnent des frameworks comme Spring MVC.
 
 ---
 
@@ -35,15 +35,14 @@ Cette architecture prépare à des frameworks plus avancés (Spring MVC) rencont
 |---|---|
 | Java JDK | 17+ |
 | Apache Maven | 3.8+ |
-| Apache Tomcat | **10.1+** (important : pas 9.x) |
+| Apache Tomcat | **10.1+** (pas 9.x) |
 | Navigateur | Tout navigateur moderne |
 
-> **Important :** Tomcat 10+ utilise le namespace `jakarta.*` (Jakarta EE).  
-> Tomcat 9 et avant utilisaient `javax.*` (Java EE). Les deux sont **incompatibles**.
+> Tomcat 10+ utilise `jakarta.*` (Jakarta EE). Tomcat 9 utilisait `javax.*` (Java EE). Les deux sont incompatibles — vérifier la version avant de déployer.
 
 ---
 
-## Instructions de compilation et déploiement
+## Compilation et déploiement
 
 ### 1. Cloner le projet
 
@@ -58,29 +57,28 @@ cd HospitApp
 mvn clean package
 ```
 
-Cela génère `target/HospitApp.war`.
+Génère `target/HospitApp.war`.
 
 ### 3a. Déploiement manuel sur Tomcat
 
 ```bash
-# Copier le WAR dans webapps/ de Tomcat
 cp target/HospitApp.war /chemin/vers/apache-tomcat-10.1.x/webapps/
 
-# Démarrer Tomcat (Linux/Mac)
+# Linux/Mac
 /chemin/vers/apache-tomcat-10.1.x/bin/startup.sh
 
-# Démarrer Tomcat (Windows)
+# Windows
 /chemin/vers/apache-tomcat-10.1.x/bin/startup.bat
 ```
 
 ### 3b. Déploiement via IntelliJ IDEA
 
-1. Aller dans **Run > Edit Configurations**
-2. Cliquer **+** → **Tomcat Server > Local**
-3. Onglet **Server** : indiquer le chemin de Tomcat 10.1
-4. Onglet **Deployment** : cliquer **+** → **Artifact** → sélectionner `HospitApp:war exploded`
-5. Définir **Application context** : `/HospitApp`
-6. Lancer avec le bouton **Run** (triangle vert)
+1. **Run > Edit Configurations**
+2. **+** → **Tomcat Server > Local**
+3. Onglet **Server** : chemin vers Tomcat 10.1
+4. Onglet **Deployment** : **+** → **Artifact** → `HospitApp:war exploded`
+5. **Application context** : `/HospitApp`
+6. Lancer avec **Run**
 
 ### 4. Accéder à l'application
 
@@ -95,21 +93,18 @@ http://localhost:8080/HospitApp/
 ```
 HospitApp/
 ├── src/
-│   └── main/
-│       ├── java/com/hospitapp/
-│       │   ├── model/      ← Classes métier (Personne, Patient, Medecin, Soin…)
-│       │   ├── servlet/    ← Servlets = contrôleurs HTTP
-│       │   ├── service/    ← Logique applicative (PatientService, PersonnelService…)
-│       │   └── util/       ← Utilitaires (Registre générique, CsvUtil…)
-│       └── webapp/
-│           ├── WEB-INF/
-│           │   ├── web.xml         ← Descripteur de déploiement Tomcat
-│           │   └── views/          ← Fichiers JSP (vues MVC — non accessibles directement)
-│           ├── css/
-│           │   └── style.css       ← Styles personnalisés
-│           └── index.jsp           ← Page d'accueil
-├── resources/                      ← Données CSV de test
-├── pom.xml                         ← Configuration Maven
+│   ├── model/          ← Classes métier (Personne, Patient, Medecin, Soin…)
+│   ├── view/           ← JSP + WEB-INF/web.xml + css/
+│   │   ├── WEB-INF/
+│   │   │   ├── web.xml         ← Descripteur de déploiement Tomcat
+│   │   │   └── views/          ← Pages JSP (non accessibles directement)
+│   │   ├── css/
+│   │   │   └── style.css
+│   │   └── index.jsp
+│   ├── controller/     ← Servlets (contrôleurs HTTP)
+│   └── util/           ← Utilitaires (Registre générique, CsvUtil…)
+├── resources/          ← Données CSV de test
+├── pom.xml
 ├── README.md
 └── rapport_conception.md
 ```
@@ -121,9 +116,9 @@ HospitApp/
 ### Classes abstraites
 | Classe | Rôle |
 |---|---|
-| `Personne` | Classe de base pour tout être humain du système |
-| `Personnel` | Extension de Personne pour le personnel médical |
-| `Soin` | Classe de base pour tous les actes médicaux |
+| `Personne` | Base commune à tout individu du système |
+| `Personnel` | Étend Personne pour le personnel médical |
+| `Soin` | Base commune à tous les actes médicaux |
 
 ### Interfaces métier
 | Interface | Rôle |
@@ -131,7 +126,7 @@ HospitApp/
 | `Soignable` | Peut recevoir des soins (Patient, Médecin) |
 | `Planifiable` | A un planning gérable (Médecin, Infirmier) |
 | `Facturable` | Génère une facturation (Patient) |
-| `Urgence` | Priorité médicale mesurable (ActeChirurgical) |
+| `Urgence` | A une priorité médicale mesurable (ActeChirurgical) |
 
 ### Héritage
 ```
@@ -148,10 +143,10 @@ Soin (abstract)
 
 ### Generics
 - `Registre<T extends Entite>` — collection générique bornée pour toute entité du système
-- Utilisation de wildcards `? extends` pour les statistiques
+- Wildcards `? extends` utilisées dans les méthodes de statistiques
 
 ### Collections utilisées
-| Collection | Usage dans le projet |
+| Collection | Usage |
 |---|---|
 | `List<Patient>` | Liste ordonnée des patients admis |
 | `Map<String, Medecin>` | Index des médecins par spécialité |
@@ -164,16 +159,19 @@ Soin (abstract)
 ## Fonctionnalités implémentées
 
 - [x] Initialisation du projet Maven web Jakarta EE
-- [ ] Gestion des patients (CRUD, admission, sortie, dossier médical)
-- [ ] Gestion du personnel (médecins, infirmiers, spécialités, plannings)
-- [ ] Gestion des soins (consultations, prescriptions, actes médicaux)
-- [ ] Gestion des salles et lits (occupation, disponibilité)
-- [ ] File d'attente urgences avec priorité médicale (PriorityQueue)
-- [ ] Filtrage multicritères (nom, état, spécialité)
-- [ ] Tri dynamique (nom, date, priorité)
-- [ ] Statistiques dynamiques (patients, lits, urgences, spécialités)
-- [ ] Persistance CSV (sauvegarde/chargement)
-- [ ] Exceptions métier personnalisées
+- [x] Modèle métier de base (Entite, Personne, Patient, Personnel, Medecin, Infirmier)
+- [ ] Interfaces métier (Soignable, Planifiable, Facturable, Urgence)
+- [ ] Soins (Consultation, ActeChirurgical, file d'urgences)
+- [ ] Classe générique Registre et collections avancées
+- [ ] Services métier (PatientService, PersonnelService, SoinService)
+- [ ] Exceptions personnalisées (CapaciteDepasseeException, EntiteIntrouvableException…)
+- [ ] Persistance CSV
+- [ ] Servlets (PatientServlet, PersonnelServlet, SoinServlet, UrgenceServlet, StatistiqueServlet)
+- [ ] Pages JSP patients (liste, détail, formulaire)
+- [ ] Pages JSP personnel, soins, urgences
+- [ ] Recherche multicritères et tri dynamique
+- [ ] Statistiques dynamiques
+- [ ] Interface Bootstrap finalisée
 
 ---
 
