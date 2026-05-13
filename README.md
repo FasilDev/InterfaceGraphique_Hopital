@@ -14,18 +14,18 @@
 
 **HospitApp** est une application web Java de gestion hospitalière, développée dans le cadre du projet POO Avancée en Bachelor 3 Informatique.
 
-L'application couvre la gestion des **patients** (admission, dossier médical, sortie), du **personnel médical** (médecins, infirmiers, spécialités, plannings), des **soins** (consultations, prescriptions, actes chirurgicaux), des **salles et lits** (occupation, disponibilité), et d'une **file d'attente des urgences** triée par priorité médicale. L'interface est responsive grâce à Bootstrap 5. Les données sont sauvegardées en CSV.
+L'application couvre la gestion des **patients** (admission, dossier médical, antécédents, sortie), du **personnel médical** (médecins avec spécialités, infirmiers, plannings, disponibilité), des **soins** (consultations, prescriptions, actes chirurgicaux), et d'une **file d'attente des urgences** triée par priorité médicale (PriorityQueue). Les données sont persistées en CSV. L'interface est responsive grâce à Bootstrap 5.
 
 ---
 
 ## Technologie choisie : Option B — Servlet/JSP (Tomcat 10.1+)
 
-On a choisi Servlet/JSP pour avoir un MVC côté serveur clair et explicite :
+Nous avons choisi Servlet/JSP pour avoir un MVC côté serveur clair et explicite :
 - Les **Servlets** reçoivent les requêtes HTTP, appellent les services et transmettent les données aux vues.
-- Les **JSP** affichent les données — elles ne contiennent pas de logique métier.
+- Les **JSP** affichent les données via JSTL — elles ne contiennent aucune logique métier.
 - Le **modèle Java** est totalement indépendant du web.
 
-C'est une bonne base pour comprendre comment fonctionnent des frameworks comme Spring MVC.
+Ce choix offre une compréhension concrète du fonctionnement des frameworks MVC comme Spring.
 
 ---
 
@@ -35,10 +35,10 @@ C'est une bonne base pour comprendre comment fonctionnent des frameworks comme S
 |---|---|
 | Java JDK | 17+ |
 | Apache Maven | 3.8+ |
-| Apache Tomcat | **10.1+** (pas 9.x) |
+| Apache Tomcat | **10.1+** (pas 9.x ni 10.0) |
 | Navigateur | Tout navigateur moderne |
 
-> Tomcat 10+ utilise `jakarta.*` (Jakarta EE). Tomcat 9 utilisait `javax.*` (Java EE). Les deux sont incompatibles — vérifier la version avant de déployer.
+> Tomcat 10+ utilise `jakarta.*` (Jakarta EE 10). Tomcat 9 utilisait `javax.*` (Java EE). Les deux sont incompatibles — vérifier la version avant de déployer.
 
 ---
 
@@ -62,12 +62,13 @@ Génère `target/HospitApp.war`.
 ### 3a. Déploiement manuel sur Tomcat
 
 ```bash
+# Copier le WAR dans Tomcat
 cp target/HospitApp.war /chemin/vers/apache-tomcat-10.1.x/webapps/
 
-# Linux/Mac
+# Démarrer Tomcat (Linux/Mac)
 /chemin/vers/apache-tomcat-10.1.x/bin/startup.sh
 
-# Windows
+# Démarrer Tomcat (Windows)
 /chemin/vers/apache-tomcat-10.1.x/bin/startup.bat
 ```
 
@@ -75,7 +76,7 @@ cp target/HospitApp.war /chemin/vers/apache-tomcat-10.1.x/webapps/
 
 1. **Run > Edit Configurations**
 2. **+** → **Tomcat Server > Local**
-3. Onglet **Server** : chemin vers Tomcat 10.1
+3. Onglet **Server** : indiquer le chemin vers Tomcat 10.1
 4. Onglet **Deployment** : **+** → **Artifact** → `HospitApp:war exploded`
 5. **Application context** : `/HospitApp`
 6. Lancer avec **Run**
@@ -86,6 +87,8 @@ cp target/HospitApp.war /chemin/vers/apache-tomcat-10.1.x/webapps/
 http://localhost:8080/HospitApp/
 ```
 
+Les données de test sont chargées automatiquement au démarrage (patients, médecins, infirmiers, consultations, actes chirurgicaux).
+
 ---
 
 ## Structure du projet
@@ -93,17 +96,59 @@ http://localhost:8080/HospitApp/
 ```
 HospitApp/
 ├── src/
-│   ├── model/          ← Classes métier (Personne, Patient, Medecin, Soin…)
-│   ├── view/           ← JSP + WEB-INF/web.xml + css/
-│   │   ├── WEB-INF/
-│   │   │   ├── web.xml         ← Descripteur de déploiement Tomcat
-│   │   │   └── views/          ← Pages JSP (non accessibles directement)
-│   │   ├── css/
-│   │   │   └── style.css
-│   │   └── index.jsp
-│   ├── controller/     ← Servlets (contrôleurs HTTP)
-│   └── util/           ← Utilitaires (Registre générique, CsvUtil…)
-├── resources/          ← Données CSV de test
+│   ├── model/              Entités métier, classes abstraites, interfaces, exceptions
+│   │   ├── Entite.java
+│   │   ├── Personne.java
+│   │   ├── Patient.java
+│   │   ├── Personnel.java
+│   │   ├── Medecin.java
+│   │   ├── Infirmier.java
+│   │   ├── Soin.java
+│   │   ├── Consultation.java
+│   │   ├── ActeChirurgical.java
+│   │   ├── FileUrgences.java
+│   │   ├── Soignable.java
+│   │   ├── Planifiable.java
+│   │   ├── Facturable.java
+│   │   ├── Urgence.java
+│   │   ├── CapaciteDepasseeException.java
+│   │   ├── EntiteIntrouvableException.java
+│   │   └── DonneeInvalideException.java
+│   ├── controller/         Services métier (logique, jamais de code HTTP)
+│   │   ├── PatientService.java
+│   │   ├── PersonnelService.java
+│   │   ├── SoinService.java
+│   │   ├── StatistiqueService.java
+│   │   └── AppListener.java
+│   ├── servlet/            Contrôleurs web (HTTP, jamais de logique métier)
+│   │   ├── PatientServlet.java
+│   │   ├── PersonnelServlet.java
+│   │   ├── SoinServlet.java
+│   │   ├── UrgenceServlet.java
+│   │   └── StatistiqueServlet.java
+│   ├── util/               Utilitaires génériques
+│   │   ├── Registre.java
+│   │   ├── CsvService.java
+│   │   └── DonneesTest.java
+│   └── view/               JSP + ressources web
+│       ├── index.jsp
+│       ├── css/style.css
+│       └── WEB-INF/
+│           ├── web.xml
+│           └── views/
+│               ├── commun/navbar.jsp
+│               ├── erreur.jsp
+│               ├── patients/
+│               ├── personnel/
+│               ├── soins/
+│               ├── urgences/
+│               └── statistiques/
+├── resources/              Données CSV de test
+│   ├── patients.csv
+│   ├── medecins.csv
+│   ├── infirmiers.csv
+│   ├── consultations.csv
+│   └── actes_chirurgicaux.csv
 ├── pom.xml
 ├── README.md
 └── rapport_conception.md
@@ -114,64 +159,87 @@ HospitApp/
 ## Architecture POO
 
 ### Classes abstraites
+
 | Classe | Rôle |
 |---|---|
-| `Personne` | Base commune à tout individu du système |
-| `Personnel` | Étend Personne pour le personnel médical |
-| `Soin` | Base commune à tous les actes médicaux |
+| `Entite` | Racine du modèle : id UUID + date de création |
+| `Personne` | Attributs communs à tout individu (nom, prénom, date de naissance…) |
+| `Personnel` | Étend Personne : matricule, disponibilité, date d'embauche |
+| `Soin` | Base commune aux actes médicaux : date, coût, patient, médecin |
 
 ### Interfaces métier
-| Interface | Rôle |
-|---|---|
-| `Soignable` | Peut recevoir des soins (Patient, Médecin) |
-| `Planifiable` | A un planning gérable (Médecin, Infirmier) |
-| `Facturable` | Génère une facturation (Patient) |
-| `Urgence` | A une priorité médicale mesurable (ActeChirurgical) |
+
+| Interface | Rôle | Implémenté par |
+|---|---|---|
+| `Soignable` | Peut recevoir des soins | `Patient`, `Medecin` |
+| `Planifiable` | Possède un planning gérable | `Medecin`, `Infirmier` |
+| `Facturable` | Génère une facturation | `Patient` |
+| `Urgence` | A une priorité médicale (1 = critique, 5 = non urgent) | `ActeChirurgical` |
 
 ### Héritage
-```
-Personne (abstract)
-├── Personnel (abstract)
-│   ├── Medecin    implements Planifiable, Soignable
-│   └── Infirmier  implements Planifiable
-└── Patient        implements Soignable, Facturable
 
-Soin (abstract)
-├── Consultation
-└── ActeChirurgical  implements Urgence
+```
+Entite (abstract)
+└── Personne (abstract)
+    ├── Personnel (abstract)
+    │   ├── Medecin     implements Planifiable, Soignable
+    │   └── Infirmier   implements Planifiable
+    └── Patient         implements Soignable, Facturable
+
+Entite (abstract)
+└── Soin (abstract)
+    ├── Consultation
+    └── ActeChirurgical  implements Urgence
 ```
 
-### Generics
-- `Registre<T extends Entite>` — collection générique bornée pour toute entité du système
-- Wildcards `? extends` utilisées dans les méthodes de statistiques
+### Generics bornés
+
+- `Registre<T extends Entite>` — collection universelle typée pour toute entité
+- Méthode `filtrer(Predicate<T>)` — lambda passé en paramètre
+- Méthode `trierPar(Comparator<? super T>)` — wildcard `? super T`
+- Méthode statique `compterEntites(List<? extends Entite>)` — wildcard `? extends`
 
 ### Collections utilisées
-| Collection | Usage |
+
+| Collection | Usage justifié |
 |---|---|
-| `List<Patient>` | Liste ordonnée des patients admis |
-| `Map<String, Medecin>` | Index des médecins par spécialité |
-| `Set<String>` | Unicité des identifiants |
-| `PriorityQueue<Patient>` | File d'attente urgences par priorité |
-| `TreeMap<LocalDate, List<Soin>>` | Planning trié par date |
+| `ArrayList<T>` | Liste ordonnée dans Registre (ordre d'insertion) |
+| `HashMap<String, T>` | Index par id — accès en O(1) dans Registre |
+| `HashSet<String>` | Vérification d'unicité des ids en O(1) dans Registre |
+| `PriorityQueue<ActeChirurgical>` | File d'urgences triée par niveau de priorité médicale |
+| `TreeMap<String, T>` | Index trié alphabétiquement — méthode `getIndexTrie()` dans Registre |
+| `LinkedHashMap<String, Long>` | Répartition des spécialités triée et ordonnée (statistiques) |
+
+### Streams et lambdas
+
+Utilisés systématiquement dans les services pour :
+- `filter()` — recherche multicritères (nom, statut, groupe sanguin, spécialité…)
+- `sorted()` avec `Comparator` — tri ASC/DESC sur nom ou date
+- `mapToDouble().sum()` — calcul du chiffre d'affaires
+- `mapToInt().average()` — âge moyen des patients hospitalisés
+- `collect(Collectors.groupingBy(..., Collectors.counting()))` — répartition par spécialité
+- `summaryStatistics()` — min/max/moyenne des coûts de consultations
+- `Stream.concat()` — fusion de deux flux (médecins + infirmiers, consultations + actes)
+- `distinct().sorted()` — liste dédoublonnée des spécialités pour les menus déroulants
 
 ---
 
 ## Fonctionnalités implémentées
 
-- [x] Initialisation du projet Maven web Jakarta EE
+- [x] Initialisation du projet Maven web Jakarta EE (pom.xml, web.xml, index.jsp)
 - [x] Modèle métier de base (Entite, Personne, Patient, Personnel, Medecin, Infirmier)
-- [ ] Interfaces métier (Soignable, Planifiable, Facturable, Urgence)
-- [ ] Soins (Consultation, ActeChirurgical, file d'urgences)
-- [ ] Classe générique Registre et collections avancées
-- [ ] Services métier (PatientService, PersonnelService, SoinService)
-- [ ] Exceptions personnalisées (CapaciteDepasseeException, EntiteIntrouvableException…)
-- [ ] Persistance CSV
-- [ ] Servlets (PatientServlet, PersonnelServlet, SoinServlet, UrgenceServlet, StatistiqueServlet)
-- [ ] Pages JSP patients (liste, détail, formulaire)
-- [ ] Pages JSP personnel, soins, urgences
-- [ ] Recherche multicritères et tri dynamique
-- [ ] Statistiques dynamiques
-- [ ] Interface Bootstrap finalisée
+- [x] Interfaces métier (Soignable, Planifiable, Facturable, Urgence)
+- [x] Soins (Consultation, ActeChirurgical, file d'urgences PriorityQueue)
+- [x] Classe générique Registre et collections avancées
+- [x] Services métier (PatientService, PersonnelService, SoinService, StatistiqueService)
+- [x] Exceptions personnalisées (CapaciteDepasseeException, EntiteIntrouvableException, DonneeInvalideException)
+- [x] Persistance CSV (sauvegarde et chargement automatiques)
+- [x] Servlets (PatientServlet, PersonnelServlet, SoinServlet, UrgenceServlet, StatistiqueServlet)
+- [x] Pages JSP patients (liste avec filtre/tri, détail, formulaire ajout/modification)
+- [x] Pages JSP personnel, soins, urgences (liste, formulaires)
+- [x] Recherche multicritères (3 critères combinables) et tri dynamique (ASC/DESC)
+- [x] Tableau de bord statistiques (10+ indicateurs dynamiques, barres de progression)
+- [x] Interface Bootstrap 5 finalisée (navbar active, alertes auto-masquées, responsive)
 
 ---
 
@@ -179,7 +247,7 @@ Soin (abstract)
 
 | Membre | Commits | Responsabilités |
 |---|---|---|
-| John | Commits 2, 3, 4, 5 | Modèle POO, interfaces, generics |
-| Fasil | Commits 6, 7, 8, 9 | Services, exceptions, Servlets |
-| Akash | Commits 10, 11, 12, 13, 14 | JSP, CSS, Bootstrap, filtres |
-| Commun | Commits 1, 15 | Init projet, README, rapport |
+| John DINH | 2, 3, 4, 5 | Modèle POO, interfaces, generics, exceptions |
+| Fasil MOUGAMADOU | 6, 7, 8, 9 | Services métier, persistance CSV, Servlets |
+| Akash ROUBERT | 10, 11, 12, 13, 14 | Pages JSP, CSS Bootstrap, filtres, statistiques |
+| Commun | 1, 15 | Initialisation projet, README, rapport de conception |
