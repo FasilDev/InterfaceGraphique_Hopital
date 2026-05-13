@@ -1,4 +1,4 @@
-<%-- Vue : liste des soins avec filtre par patient, médecin et type de soin --%>
+<%-- Vue : liste des soins avec filtre par patient, médecin, type de soin, et tri par date --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
@@ -32,13 +32,13 @@
     </c:if>
 
     <%-- =====================================================================
-         FORMULAIRE DE FILTRAGE
-         Critère 1 : type  |  Critère 2 : patient  |  Critère 3 : médecin
+         FORMULAIRE DE FILTRAGE ET TRI
+         Critère 1 : type  |  Critère 2 : patient  |  Critère 3 : médecin  |  Tri : date
          ===================================================================== --%>
     <div class="card shadow-sm mb-3">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            <span class="fw-bold">Filtres</span>
-            <c:if test="${not empty criterePatient or not empty critereMedecin or not empty critereType}">
+            <span class="fw-bold">Filtres et tri</span>
+            <c:if test="${not empty criterePatient or not empty critereMedecin or not empty critereType or not empty triOrdre}">
                 <a href="${pageContext.request.contextPath}/soins"
                    class="btn btn-sm btn-outline-secondary">Effacer les filtres</a>
             </c:if>
@@ -48,15 +48,15 @@
                 <div class="row g-2 align-items-end">
 
                     <%-- Critère 1 : type de soin --%>
-                    <div class="col-md-3">
+                    <div class="col-md-2">
                         <label class="form-label small">Type de soin</label>
                         <select name="type" class="form-select form-select-sm">
                             <option value="">Tous</option>
                             <option value="consultation" ${critereType == 'consultation' ? 'selected' : ''}>
-                                Consultations uniquement
+                                Consultations
                             </option>
                             <option value="acte" ${critereType == 'acte' ? 'selected' : ''}>
-                                Actes chirurgicaux uniquement
+                                Actes chirurgicaux
                             </option>
                         </select>
                     </div>
@@ -77,7 +77,20 @@
                                value="${not empty critereMedecin ? critereMedecin : ''}">
                     </div>
 
-                    <div class="col-md-3">
+                    <%-- Tri : ordre de date --%>
+                    <div class="col-md-2">
+                        <label class="form-label small">Ordre des dates</label>
+                        <select name="ordre" class="form-select form-select-sm">
+                            <option value="desc" ${triOrdre == 'desc' or empty triOrdre ? 'selected' : ''}>
+                                Plus récent ↓
+                            </option>
+                            <option value="asc" ${triOrdre == 'asc' ? 'selected' : ''}>
+                                Plus ancien ↑
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
                         <button type="submit" class="btn btn-info text-white btn-sm w-100">OK</button>
                     </div>
                 </div>
@@ -114,7 +127,10 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-info">
                             <tr>
-                                <th>Date</th>
+                                <th>
+                                    Date
+                                    <span class="text-warning">${triOrdre == 'asc' ? '↑' : '↓'}</span>
+                                </th>
                                 <th>Motif</th>
                                 <th>Patient</th>
                                 <th>Médecin</th>
@@ -199,7 +215,10 @@
                     <table class="table table-hover mb-0">
                         <thead class="table-danger">
                             <tr>
-                                <th>Date</th>
+                                <th>
+                                    Date
+                                    <span class="text-warning">${triOrdre == 'asc' ? '↑' : '↓'}</span>
+                                </th>
                                 <th>Acte</th>
                                 <th>Priorité</th>
                                 <th>Patient</th>
@@ -263,6 +282,7 @@
         <c:if test="${not empty criterePatient or not empty critereMedecin or not empty critereType}">
             — filtre actif
         </c:if>
+        — trié par date ${triOrdre == 'asc' ? '(plus ancien en premier)' : '(plus récent en premier)'}
     </p>
 
 </main>

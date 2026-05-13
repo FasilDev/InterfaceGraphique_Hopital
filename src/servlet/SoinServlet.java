@@ -66,22 +66,25 @@ public class SoinServlet extends HttpServlet {
             throws ServletException, IOException {
         String numeroPatient    = req.getParameter("numeroPatient");
         String matriculeMedecin = req.getParameter("matriculeMedecin");
-        String type             = req.getParameter("type"); // "consultation", "acte", ou null = tous
+        String type             = req.getParameter("type");   // "consultation", "acte", ou null = tous
+        String ordre            = req.getParameter("ordre");  // "asc" ou "desc"
+        boolean croissant       = !"desc".equals(ordre);      // par défaut : plus récent en premier = desc
 
         // Si on filtre par type, on vide la liste de l'autre type pour éviter de l'afficher
         List<Consultation>    consultations = "acte".equals(type)
                 ? java.util.Collections.emptyList()
-                : soinService.rechercherConsultations(numeroPatient, matriculeMedecin);
+                : soinService.rechercherConsultations(numeroPatient, matriculeMedecin, croissant);
 
         List<ActeChirurgical> actes = "consultation".equals(type)
                 ? java.util.Collections.emptyList()
-                : soinService.rechercherActes(numeroPatient, matriculeMedecin);
+                : soinService.rechercherActes(numeroPatient, matriculeMedecin, croissant);
 
         req.setAttribute("consultations",         consultations);
         req.setAttribute("actes",                 actes);
         req.setAttribute("criterePatient",        numeroPatient);
         req.setAttribute("critereMedecin",        matriculeMedecin);
         req.setAttribute("critereType",           type);
+        req.setAttribute("triOrdre",              ordre);
         forward(req, resp, "/WEB-INF/views/soins/liste.jsp");
     }
 

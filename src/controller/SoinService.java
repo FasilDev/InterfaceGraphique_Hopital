@@ -152,30 +152,44 @@ public class SoinService {
 
     /**
      * Recherche des consultations par numéro de patient et/ou matricule de médecin.
-     * Résultats triés du plus récent au plus ancien.
+     * Le tri est dynamique : date croissante ou décroissante selon le paramètre.
      * Critères optionnels : null ou vide = ignoré.
+     *
+     * @param numeroPatient    numéro métier du patient (ex : "P-2024-001"), null = tous
+     * @param matriculeMedecin matricule du médecin (ex : "MED-001"), null = tous
+     * @param croissant        true = du plus ancien au plus récent, false = inverse
      */
-    public List<Consultation> rechercherConsultations(String numeroPatient, String matriculeMedecin) {
+    public List<Consultation> rechercherConsultations(String numeroPatient, String matriculeMedecin,
+                                                      boolean croissant) {
+        Comparator<Soin> parDate = Comparator.comparing(Soin::getDateSoin);
+        if (!croissant) parDate = parDate.reversed();
+
         return registreConsultations.getTous().stream()
                 .filter(c -> numeroPatient == null || numeroPatient.isBlank()
                         || c.getNumeroPatient().equals(numeroPatient))
                 .filter(c -> matriculeMedecin == null || matriculeMedecin.isBlank()
                         || c.getMatriculeMedecin().equals(matriculeMedecin))
-                .sorted(Comparator.comparing(Soin::getDateSoin).reversed())
+                .sorted(parDate)
                 .collect(Collectors.toList());
     }
 
     /**
      * Recherche des actes chirurgicaux par numéro de patient et/ou matricule de médecin.
-     * Résultats triés du plus récent au plus ancien.
+     * Même logique de tri que pour les consultations.
+     *
+     * @param croissant true = du plus ancien au plus récent, false = inverse
      */
-    public List<ActeChirurgical> rechercherActes(String numeroPatient, String matriculeMedecin) {
+    public List<ActeChirurgical> rechercherActes(String numeroPatient, String matriculeMedecin,
+                                                 boolean croissant) {
+        Comparator<Soin> parDate = Comparator.comparing(Soin::getDateSoin);
+        if (!croissant) parDate = parDate.reversed();
+
         return registreActes.getTous().stream()
                 .filter(a -> numeroPatient == null || numeroPatient.isBlank()
                         || a.getNumeroPatient().equals(numeroPatient))
                 .filter(a -> matriculeMedecin == null || matriculeMedecin.isBlank()
                         || a.getMatriculeMedecin().equals(matriculeMedecin))
-                .sorted(Comparator.comparing(Soin::getDateSoin).reversed())
+                .sorted(parDate)
                 .collect(Collectors.toList());
     }
 
