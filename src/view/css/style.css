@@ -171,3 +171,51 @@ main {
 footer {
     margin-top: auto;
 }
+
+/* ===== LIEN ACTIF DANS LA NAVBAR ===== */
+
+/*
+ * .active dans la navbar Bootstrap = lien de la page courante.
+ * On renforce la visibilité avec un soulignement et une opacité pleine.
+ * Bootstrap met déjà opacity: .75 sur les liens non actifs — on restaure 1.
+ */
+.navbar-nav .nav-link.active {
+    font-weight: 600;
+    text-decoration: underline;
+    opacity: 1;
+}
+
+/* ===== BARRES DE PROGRESSION ===== */
+
+/* Transition douce pour les barres de progression (taux d'occupation, répartition) */
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+/* ===== BOUTONS — CURSEUR DE CHARGEMENT ===== */
+
+/*
+ * Quand un formulaire est soumis, on indique visuellement que quelque chose se passe.
+ * pointer-events: none évite les double-clics accidentels.
+ */
+form button[type="submit"]:active {
+    cursor: wait;
+}
+
+/* ===== TABLEAU — LIGNE SÉLECTIONNÉE ===== */
+
+/*
+ * :focus-within = la ligne contient un élément qui a le focus (bouton, lien...).
+ * Donne un retour visuel subtil quand l'utilisateur navigue au clavier.
+ */
+.table tbody tr:focus-within {
+    outline: 2px solid #0d6efd;
+    outline-offset: -2px;
+}
+
+/* ===== CARTES DE STATISTIQUES ===== */
+
+/* Légère animation d'entrée pour les cartes du tableau de bord */
+.card {
+    animation: fadeIn 0.25s ease-in;
+}
