@@ -23,6 +23,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.DoubleSummaryStatistics;
 
 @WebServlet("/statistiques")
 public class StatistiqueServlet extends HttpServlet {
@@ -59,6 +60,14 @@ public class StatistiqueServlet extends HttpServlet {
         req.setAttribute("nbConsultationsAujourd",  statistiqueService.getNombreConsultationsAujourdhui());
 
         req.setAttribute("chiffreAffaires",         statistiqueService.getChiffreAffairesTotal());
+
+        // DoubleSummaryStatistics : résumé financier des consultations en un seul passage stream.
+        // On expose chaque valeur séparément car les objets Java ne sont pas directement
+        // utilisables dans les expressions EL des JSP (pas de getters standards sur ce type).
+        DoubleSummaryStatistics stats = statistiqueService.getStatistiquesFinancieresSoins();
+        req.setAttribute("coutMoyenConsultation", stats.getCount() > 0 ? stats.getAverage() : 0.0);
+        req.setAttribute("coutMinConsultation",   stats.getCount() > 0 ? stats.getMin()     : 0.0);
+        req.setAttribute("coutMaxConsultation",   stats.getCount() > 0 ? stats.getMax()     : 0.0);
 
         req.getRequestDispatcher("/WEB-INF/views/statistiques/tableau-bord.jsp")
                 .forward(req, resp);
