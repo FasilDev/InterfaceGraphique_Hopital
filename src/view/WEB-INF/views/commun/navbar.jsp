@@ -6,8 +6,7 @@
     Note : le lien de la section courante est mis en surbrillance automatiquement
            grâce au script JS en bas de ce fragment (lecture de l'URL courante).
 --%>
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
     <div class="container">
 
